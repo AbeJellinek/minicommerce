@@ -1,0 +1,8 @@
+.panel-heading {
+    font-size: 20px;
+}
+
+#messageList {
+    max-height: 150px;
+    overflow-y: scroll;
+}

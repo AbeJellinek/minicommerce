@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{title}} | {{siteName}}</title>
+    {{#block "head"}}{{/block}}
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.3/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/layout.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <meta name="_csrf" content="{{_csrf.token}}"/>
+    <meta name="_csrf_header" content="{{_csrf.headerName}}"/>
+</head>
+<body>
+
+<div class="ui secondary menu {{#if noNavSpace}}zero margin{{/if}}">
+    <a href="/" class="{{#if inBrowse}}active{{/if}} item">
+        <i class="browser icon"></i> Browse
+    </a>
+    <a href="/categories" class="{{#if inCategories}}active{{/if}} item">
+        <i class="tags icon"></i> Categories
+    </a>
+
+    <div class="right menu">
+        <div class="item">
+            <div class="ui transparent icon input">
+                <input type="text" placeholder="Search...">
+                <i class="search link icon"></i>
+            </div>
+        </div>
+        <a id="cartButton" href="/cart" class="{{#if inCart}}active{{/if}} item">
+            <i class="cart icon"></i> Cart <div id="navCartTotal" class="ui label">{{cart.totalQuantity}}</div>
+        </a>
+        <div class="ui flowing popup">
+            {{> cartFragment}}
+        </div>
+    </div>
+</div>
+
+{{#block "content"}}
+<h1>Add content here.</h1>
+{{/block}}
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.3/semantic.min.js"></script>
+<script type="text/javascript">
+    $.fn.api.settings.successTest = function(response) {
+        if(response && response.success) {
+            return response.success;
+        }
+        return false;
+    };
+
+    $('#cartButton:not(.active)')
+        .popup({
+            inline: true,
+            hoverable: true,
+            transition: 'fade down',
+            delay: {
+                show: 100,
+                hide: 500
+            }
+        })
+</script>
+{{#block "scripts"}}{{/block}}
+</body>
+</html>

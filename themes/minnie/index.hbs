@@ -1,0 +1,25 @@
+{{#partial "content"}}
+    <div class="hero image" style="background-image: url('/img/header.jpg')"></div>
+
+    <div class="ui page grid">
+        {{#each products}}
+            <div class="four wide column">
+                <a href="/product/{{id}}">
+                    <div class="ui card">
+                        {{#if image}}
+                            <div class="image">
+                                <img src="{{image}}">
+                            </div>
+                        {{/if}}
+                        <div class="content">
+                            <div class="header">{{name}}</div>
+                            <div class="meta">{{prettyPrice}}</div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {{/each}}
+    </div>
+{{/partial}}
+
+{{> layout title='Home' noNavSpace=true}}

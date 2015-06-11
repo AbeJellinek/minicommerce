@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.thymeleaf.org">
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title layout:title-pattern="$DECORATOR_TITLE - $CONTENT_TITLE">Minicommerce</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.3/semantic.min.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<body>
+
+<div class="ui menu">
+    <a th:href="@{/}" class="item">
+        <i class="left arrow icon"></i>
+    </a>
+    <a th:href="@{/admin}" class="item">
+        <b>Minicommerce</b>
+    </a>
+    <a th:href="@{/admin/products}" class="item">
+        Products
+    </a>
+
+    <div class="right menu">
+        <form id="logoutForm" th:action="@{/logout}" th:method="post">
+            <div th:if="${user != null}" class="ui dropdown item">
+                <span th:text="${user.username}"></span>
+                <i class="dropdown icon"></i>
+
+                <div class="menu">
+                    <a class="item" id="logoutLink" href="#">Log Out</a>
+                </div>
+            </div>
+            <a th:unless="${user != null}" th:href="@{/login}" class="item">Log In</a>
+        </form>
+    </div>
+</div>
+
+<div layout:fragment="content">
+
+</div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.3/semantic.min.js"></script>
+
+<script>
+    $('#logoutLink').click(function () {
+        $('#logoutForm').submit();
+        return false;
+    });
+</script>
+
+<div layout:fragment="bottom"></div>
+
+</body>
+</html>

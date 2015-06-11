@@ -1,0 +1,278 @@
+{{#partial "content"}}
+    <form class="ui form" method="post">
+        <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}"/>
+
+        <div class="ui page grid">
+            <div class="centered twelve wide column">
+                <h1 class="ui centered header">
+                    Checkout
+                </h1>
+
+                <div class="ui three ordered steps">
+                  <div id="step1" class="active step">
+                    <div class="content">
+                      <div class="title">Shipping</div>
+                      <div class="description">Choose your shipping options</div>
+                    </div>
+                  </div>
+                  <div id="step2" class="step">
+                    <div class="content">
+                      <div class="title">Billing</div>
+                      <div class="description">Enter billing information</div>
+                    </div>
+                  </div>
+                  <div class="step">
+                    <div class="content">
+                      <div class="title">Confirm Order</div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+            <div id="shipping" class="sixteen wide column">
+                <div class="ui top attached segment">
+                    <div class="ui form">
+                        <h3 class="ui dividing header">Shipping Address</h3>
+                        <div class="required field">
+                            <label>Name</label>
+                            <div class="two fields">
+                                <div class="field">
+                                    <input type="text" name="firstName" placeholder="First Name">
+                                </div>
+                                <div class="field">
+                                    <input type="text" name="lastName" placeholder="Last Name">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="required field">
+                            <label>Street Address</label>
+                            <input type="text" name="address1" id="address1" placeholder="Street Address">
+                        </div>
+
+                        <div class="field">
+                            <label>Address Line 2</label>
+                            <input type="text" name="address2" placeholder="Apt, Suite, Bldg.">
+                        </div>
+
+                        <div class="two fields">
+                            <div class="required field">
+                                <label>Postal Code</label>
+                                <input id="postalCode" name="postalCode" type="text" placeholder="Postal Code">
+                            </div>
+
+                            <div class="required field">
+                                <label>City</label>
+                                <input id="city" name="city" type="text" placeholder="City">
+                            </div>
+                        </div>
+
+                        <div class="two fields">
+                            <div class="required field">
+                                <label>Country</label>
+                                <select name="country" class="ui icon input search dropdown country">
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label>State/Province</label>
+                                <select name="state" disabled class="ui icon input search dropdown state">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui error message"></div>
+                </div>
+
+                <div class="ui bottom attached segment">
+                    <a href="/cart" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> Back</a>
+                    <a href="#" id="next" class="ui primary right floated right labeled icon button">Next <i class="right arrow icon"></i></a>
+                </div>
+            </div>
+
+            <div id="billing" class="sixteen wide column" style="display:none;">
+                <div class="ui top attached segment">
+                    <div class="ui form">
+                        <h3 class="ui dividing header">Billing</h3>
+
+                        {{> cartFragment}}
+
+                        <p>Your payment is securely processed by <a href="http://stripe.com">Stripe</a>.</p>
+                        <input type="hidden" name="stripeEmail" id="stripeEmail">
+                        <input type="hidden" name="stripeToken" id="stripeToken">
+                    </div>
+                </div>
+
+                <div class="ui bottom attached segment">
+                    <a id="back" href="#" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> Back</a>
+                    <a id="pay" href="#" class="ui primary right floated button">Pay with Card</a>
+                </div>
+            </div>
+        </div>
+    </form>
+{{/partial}}
+
+{{#partial "scripts"}}
+<script type="text/javascript" src="/js/jeoquery.js"></script>
+<script type="text/javascript" src="https://checkout.stripe.com/checkout.js"></script>
+<script type="text/javascript" src="/js/jquery.serialize-object.min.js"></script>
+<script type="text/javascript">
+$('select.dropdown')
+  .dropdown();
+
+jeoquery.defaultData.userName = 'minicommerce';
+
+function countryChanged(callback, id) {
+    $('.state').addClass('loading');
+    $.when(jeoquery.getGeoNames('children', {'geonameId': id || country.find(":selected").data('id')})).then(function (data) {
+        var sortedNames = data.geonames;
+        if (data.geonames.sort) {
+            sortedNames = data.geonames.sort(function (a, b) {
+                return a.name.localeCompare(b.name);
+            });
+        }
+        // Insert blank choice
+        sortedNames.unshift({name:''});
+        var html = $.map(sortedNames, function(c) {
+            return '<option value="' + c.name + '">' + c.name + '</option>';
+        });
+        $('.state select').html(html).prop('disabled', false);
+        $('.state').removeClass('loading');
+
+        if (!!(callback && callback.constructor && callback.call && callback.apply))
+            callback();
+    })
+}
+
+var country = $('.country');
+country.addClass('loading');
+$('.country select').jeoCountrySelect({
+    callback: function () {
+        country.removeClass('loading');
+        country.dropdown('set selected', 'US');
+    }
+});
+
+$('.country select').change(countryChanged);
+
+$('#postalCode').jeoPostalCodeLookup({
+    countryInput: country,
+    callback: function (data) {
+        $('#city').val(data.placeName);
+        country.dropdown('set selected', data.countryCode);
+        countryChanged(function () {
+            $('.state').dropdown('set selected', data.adminName1);
+        });
+    }
+});
+
+
+$('#next').click(function () {
+    if ($('form').form('validate form')) {
+        $('#step1').removeClass('active');
+        $('#shipping').transition('fly right', 500, function () {
+            $('#billing').transition('fly left');
+            $('#step2').addClass('active');
+        });
+    }
+});
+
+$('#back').click(function () {
+    $('#step2').removeClass('active');
+    $('#billing').transition('fly left', 500, function () {
+        $('#shipping').transition('fly right');
+        $('#step1').addClass('active');
+    });
+});  
+
+var handler = StripeCheckout.configure({
+    key: 'pk_test_z3GSUYh1uvdC1Yzw5fPooyni',
+    token: function(token) {
+        $('stripeToken').text(token.id);
+        $('stripeEmail').text(token.email);
+        $('#pay').api({
+            url: '/checkout/buy',
+            method: 'POST',
+            serializeForm: true,
+            on: 'now',
+            stateContext: '#pay'
+        });
+    }
+  });
+
+  $('#pay').on('click', function(e) {
+    // Open Checkout with further options
+    handler.open({
+      name: 'Demo Site',
+      description: '2 widgets',
+      amount: 2000
+    });
+    e.preventDefault();
+  });
+
+  // Close Checkout on page navigation
+  $(window).on('popstate', function() {
+    handler.close();
+  });
+
+    $('form')
+        .form({
+            firstName: {
+                identifier: 'firstName',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Please enter your first name'
+                    }
+                ]
+            },
+            lastName: {
+                identifier: 'lastName',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Please enter your last name'
+                    }
+                ]
+            },
+            address1: {
+                identifier: 'address1',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Please enter a valid street address'
+                    }
+                ]
+            },
+            postalCode: {
+                identifier: 'postalCode',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Please enter a valid postal code'
+                    }
+                ]
+            },
+            city: {
+                identifier: 'city',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Please enter a valid city'
+                    }
+                ]
+            },
+            country: {
+                identifier: 'country',
+                rules: [
+                    {
+                        type: 'empty',
+                        prompt: 'Please enter a valid country'
+                    }
+                ]
+            }
+        });
+</script>
+{{/partial}}
+
+{{> layout title='Checkout'}}
