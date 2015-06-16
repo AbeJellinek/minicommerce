@@ -40,7 +40,6 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
         return items.iterator();
     }
 
-    @JsonIgnore
     public List<Item> getItems() {
         return items;
     }
@@ -122,7 +121,6 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
             this.quantity = quantity;
         }
 
-        @JsonIgnore
         public Product getProduct() {
             return product;
         }

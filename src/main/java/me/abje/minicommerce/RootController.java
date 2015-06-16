@@ -81,16 +81,19 @@ public class RootController {
                                           HttpSession session) {
         Cart cart = cart(session);
 
-        if (quantity <= 0) {
-            return new CartResponse(false, cart);
-        }
-
-        for (Cart.Item item : cart) {
+        for (ListIterator<Cart.Item> iterator = cart.getItems().listIterator(); iterator.hasNext(); ) {
+            Cart.Item item = iterator.next();
             if (item.getProduct().getId() == id) {
-                item.setQuantity(quantity);
+                if (quantity > 0) {
+                    item.setQuantity(quantity);
+                } else {
+                    iterator.remove();
+                }
                 break;
             }
         }
+
+        carts.save(cart);
 
         return new CartResponse(true, cart);
     }
@@ -100,6 +103,7 @@ public class RootController {
     public SuccessResponse addToCart(@PathVariable("id") Product product, HttpSession session) {
         Cart cart = cart(session);
         cart.add(product, 1);
+        carts.save(cart);
         return new CartResponse(true, cart);
     }
 
@@ -114,6 +118,7 @@ public class RootController {
                 break;
             }
         }
+        carts.save(cart);
 
         return new CartResponse(true, cart);
     }
@@ -125,9 +130,9 @@ public class RootController {
         return "checkout";
     }
 
-    @RequestMapping(value = "/checkout/buy", method = RequestMethod.POST)
+    @RequestMapping(value = "/checkout/payment", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse checkoutBuy() {
+    public SuccessResponse checkoutPayment() {
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {

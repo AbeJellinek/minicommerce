@@ -1,15 +1,22 @@
 package me.abje.minicommerce.db;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import me.abje.minicommerce.money.CurrencyConverter;
 import org.joda.money.Money;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.util.Objects;
 
 @Entity
 public class Product extends ModelBase {
     private String name;
+    @JsonIgnore
     private Money price;
+    @Column(columnDefinition="text")
+    @JsonIgnore
+    private String description;
 
     public Product(String name, Money price) {
         this.name = name;
@@ -35,6 +42,7 @@ public class Product extends ModelBase {
         this.price = price;
     }
 
+    @JsonProperty
     public String getPrettyPrice() {
         return CurrencyConverter.prettify(price);
     }

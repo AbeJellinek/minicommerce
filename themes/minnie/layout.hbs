@@ -30,9 +30,12 @@
         <a id="cartButton" href="/cart" class="{{#if inCart}}active{{/if}} item">
             <i class="cart icon"></i> Cart <div id="navCartTotal" class="ui label">{{cart.totalQuantity}}</div>
         </a>
+        {{#unless inCart}}
         <div class="ui flowing popup">
             {{> cartFragment}}
+            <a href="/checkout" class="ui right floated tiny icon button"><i class="right arrow icon"></i></a>
         </div>
+        {{/unless}}
     </div>
 </div>
 
@@ -60,6 +63,7 @@
             }
         })
 </script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
 {{#block "scripts"}}{{/block}}
 </body>
 </html>

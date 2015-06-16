@@ -12,18 +12,18 @@
                   <div id="step1" class="active step">
                     <div class="content">
                       <div class="title">Shipping</div>
-                      <div class="description">Choose your shipping options</div>
+                      <div class="description">Enter name and address</div>
                     </div>
                   </div>
                   <div id="step2" class="step">
                     <div class="content">
                       <div class="title">Billing</div>
-                      <div class="description">Enter billing information</div>
+                      <div class="description">Enter payment information</div>
                     </div>
                   </div>
-                  <div class="step">
+                  <div id="step3" class="step">
                     <div class="content">
-                      <div class="title">Confirm Order</div>
+                      <div class="title">Done!</div>
                     </div>
                   </div>
                 </div>
@@ -76,7 +76,7 @@
 
                             <div class="field">
                                 <label>State/Province</label>
-                                <select name="state" disabled class="ui icon input search dropdown state">
+                                <select name="state" disabled class="ui icon input dropdown state">
                                 </select>
                             </div>
                         </div>
@@ -108,6 +108,19 @@
                     <a id="pay" href="#" class="ui primary right floated button">Pay with Card</a>
                 </div>
             </div>
+
+            <div id="done" class="sixteen wide column" style="display:none;">
+                <div class="ui top attached segment">
+                    <div class="ui form">
+                        <h3 class="ui dividing header">Success</h3>
+                        <p><b>Thank you!</b> Your order was completed successfully.</p>
+                    </div>
+                </div>
+
+                <div class="ui bottom attached segment">
+                    <a href="/" class="ui primary right floated button">Done</a>
+                </div>
+            </div>
         </div>
     </form>
 {{/partial}}
@@ -137,7 +150,7 @@ function countryChanged(callback, id) {
             return '<option value="' + c.name + '">' + c.name + '</option>';
         });
         $('.state select').html(html).prop('disabled', false);
-        $('.state').removeClass('loading');
+        $('.state').removeClass('loading').dropdown('clear');
 
         if (!!(callback && callback.constructor && callback.call && callback.apply))
             callback();
@@ -149,10 +162,21 @@ country.addClass('loading');
 $('.country select').jeoCountrySelect({
     callback: function () {
         country.removeClass('loading');
-        country.dropdown('set selected', 'US');
     }
 });
 
+var addedFlags = false;
+country.dropdown({
+    onShow: function () {
+        if (addedFlags || $(this).hasClass('loading'))
+            return;
+        addedFlags = true;
+        $('.country div.item').each(function (i, option) {
+            var $option = $(option);
+            $option.prepend($('<i class="' + $option.data('value').toLowerCase() + ' flag"></i> '));
+        });
+    }
+});
 $('.country select').change(countryChanged);
 
 $('#postalCode').jeoPostalCodeLookup({
@@ -170,19 +194,21 @@ $('#postalCode').jeoPostalCodeLookup({
 $('#next').click(function () {
     if ($('form').form('validate form')) {
         $('#step1').removeClass('active');
-        $('#shipping').transition('fly right', 500, function () {
-            $('#billing').transition('fly left');
+        $('#shipping').transition('fade right', 500, function () {
+            $('#billing').transition('fade left');
             $('#step2').addClass('active');
         });
     }
+    return false;
 });
 
 $('#back').click(function () {
     $('#step2').removeClass('active');
-    $('#billing').transition('fly left', 500, function () {
-        $('#shipping').transition('fly right');
+    $('#billing').transition('fade left', 500, function () {
+        $('#shipping').transition('fade right');
         $('#step1').addClass('active');
     });
+    return false;
 });  
 
 var handler = StripeCheckout.configure({
@@ -191,87 +217,91 @@ var handler = StripeCheckout.configure({
         $('stripeToken').text(token.id);
         $('stripeEmail').text(token.email);
         $('#pay').api({
-            url: '/checkout/buy',
+            url: '/checkout/payment',
             method: 'POST',
             serializeForm: true,
             on: 'now',
-            stateContext: '#pay'
-        });
-    }
-  });
-
-  $('#pay').on('click', function(e) {
-    // Open Checkout with further options
-    handler.open({
-      name: 'Demo Site',
-      description: '2 widgets',
-      amount: 2000
-    });
-    e.preventDefault();
-  });
-
-  // Close Checkout on page navigation
-  $(window).on('popstate', function() {
-    handler.close();
-  });
-
-    $('form')
-        .form({
-            firstName: {
-                identifier: 'firstName',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Please enter your first name'
-                    }
-                ]
-            },
-            lastName: {
-                identifier: 'lastName',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Please enter your last name'
-                    }
-                ]
-            },
-            address1: {
-                identifier: 'address1',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Please enter a valid street address'
-                    }
-                ]
-            },
-            postalCode: {
-                identifier: 'postalCode',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Please enter a valid postal code'
-                    }
-                ]
-            },
-            city: {
-                identifier: 'city',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Please enter a valid city'
-                    }
-                ]
-            },
-            country: {
-                identifier: 'country',
-                rules: [
-                    {
-                        type: 'empty',
-                        prompt: 'Please enter a valid country'
-                    }
-                ]
+            stateContext: '#pay',
+            onSuccess: function () {
+                $('#step2').removeClass('active');
+                $('#billing').transition('fade right', 500, function () {
+                    $('#done').transition('fade left');
+                    $('#step3').addClass('active');
+                });
             }
         });
+    }
+});
+
+$('#pay').on('click', function () {
+    handler.open({
+        name: '{{siteName}}',
+        amount: {{cart.total.amountMinorInt}}
+    });
+    return false;
+});
+
+// Close Checkout on page navigation
+$(window).on('popstate', function() {
+    handler.close();
+});
+
+$('form').form({
+    firstName: {
+        identifier: 'firstName',
+        rules: [
+            {
+                type: 'empty',
+                prompt: 'Please enter your first name'
+            }
+        ]
+    },
+    lastName: {
+        identifier: 'lastName',
+        rules: [
+            {
+                type: 'empty',
+                prompt: 'Please enter your last name'
+            }
+        ]
+    },
+    address1: {
+        identifier: 'address1',
+        rules: [
+            {
+                type: 'empty',
+                prompt: 'Please enter a valid street address'
+            }
+        ]
+    },
+    postalCode: {
+        identifier: 'postalCode',
+        rules: [
+            {
+                type: 'empty',
+                prompt: 'Please enter a valid postal code'
+            }
+        ]
+    },
+    city: {
+        identifier: 'city',
+        rules: [
+            {
+                type: 'empty',
+                prompt: 'Please enter a valid city'
+            }
+        ]
+    },
+    country: {
+        identifier: 'country',
+        rules: [
+            {
+                type: 'empty',
+                prompt: 'Please enter a valid country'
+            }
+        ]
+    }
+});
 </script>
 {{/partial}}
 

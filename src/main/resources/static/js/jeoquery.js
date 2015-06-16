@@ -133,12 +133,21 @@ var jeoquery = (function ($) {
       if (code) {
         jeoquery.getGeoNames('postalCodeLookup', {postalcode: code, country: country}, function (data) {
           if (data && data.postalcodes && data.postalcodes.length > 0) {
+            var code;
+            $.each(data.postalcodes, function (i, postalCode) {
+              if (postalCode.countryCode === 'US') {
+                code = postalCode;
+                return false;
+              }
+            });
+            if (!code)
+              code = data.postalcodes[0];
             if (options) {
               if (options.target) {
-                options.target.val(data.postalcodes[0].placeName);
+                options.target.val(code.placeName);
               }
               if (options.callback) {
-                options.callback(data.postalcodes[0]);
+                options.callback(code);
               }
             }
           }
