@@ -1,5 +1,5 @@
 {{#partial "content"}}
-    <form class="ui form" method="post">
+    <form method="post">
         <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}"/>
 
         <div class="ui page grid">
@@ -31,18 +31,23 @@
 
             <div id="shipping" class="sixteen wide column">
                 <div class="ui top attached segment">
-                    <div class="ui form">
+                    <div id="shippingForm" class="ui form">
                         <h3 class="ui dividing header">Shipping Address</h3>
                         <div class="required field">
                             <label>Name</label>
                             <div class="two fields">
-                                <div class="field">
+                                <div id="firstNameField" class="field">
                                     <input type="text" name="firstName" placeholder="First Name">
                                 </div>
                                 <div class="field">
                                     <input type="text" name="lastName" placeholder="Last Name">
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="required field">
+                            <label>Email</label>
+                            <input type="email" name="email" placeholder="Email">
                         </div>
 
                         <div class="required field">
@@ -70,18 +75,17 @@
                         <div class="two fields">
                             <div class="required field">
                                 <label>Country</label>
-                                <select name="country" class="ui icon input search dropdown country">
+                                <select name="country" class="ui input country">
                                 </select>
                             </div>
 
                             <div class="field">
                                 <label>State/Province</label>
-                                <select name="state" disabled class="ui icon input dropdown state">
-                                </select>
+                                <input class="state" name="state" type="text" placeholder="State">
                             </div>
                         </div>
+                        <div class="ui error message"></div>
                     </div>
-                    <div class="ui error message"></div>
                 </div>
 
                 <div class="ui bottom attached segment">
@@ -98,7 +102,6 @@
                         {{> cartFragment}}
 
                         <p>Your payment is securely processed by <a href="http://stripe.com">Stripe</a>.</p>
-                        <input type="hidden" name="stripeEmail" id="stripeEmail">
                         <input type="hidden" name="stripeToken" id="stripeToken">
                     </div>
                 </div>
@@ -135,64 +138,16 @@ $('select.dropdown')
 
 jeoquery.defaultData.userName = 'minicommerce';
 
-function countryChanged(callback, id) {
-    $('.state').addClass('loading');
-    $.when(jeoquery.getGeoNames('children', {'geonameId': id || country.find(":selected").data('id')})).then(function (data) {
-        var sortedNames = data.geonames;
-        if (data.geonames.sort) {
-            sortedNames = data.geonames.sort(function (a, b) {
-                return a.name.localeCompare(b.name);
-            });
-        }
-        // Insert blank choice
-        sortedNames.unshift({name:''});
-        var html = $.map(sortedNames, function(c) {
-            return '<option value="' + c.name + '">' + c.name + '</option>';
-        });
-        $('.state select').html(html).prop('disabled', false);
-        $('.state').removeClass('loading').dropdown('clear');
-
-        if (!!(callback && callback.constructor && callback.call && callback.apply))
-            callback();
-    })
-}
-
 var country = $('.country');
-country.addClass('loading');
-$('.country select').jeoCountrySelect({
+$('#shippingForm').addClass('loading');
+country.jeoCountrySelect({
     callback: function () {
-        country.removeClass('loading');
+        $('#shippingForm').removeClass('loading');
     }
 });
-
-var addedFlags = false;
-country.dropdown({
-    onShow: function () {
-        if (addedFlags || $(this).hasClass('loading'))
-            return;
-        addedFlags = true;
-        $('.country div.item').each(function (i, option) {
-            var $option = $(option);
-            $option.prepend($('<i class="' + $option.data('value').toLowerCase() + ' flag"></i> '));
-        });
-    }
-});
-$('.country select').change(countryChanged);
-
-$('#postalCode').jeoPostalCodeLookup({
-    countryInput: country,
-    callback: function (data) {
-        $('#city').val(data.placeName);
-        country.dropdown('set selected', data.countryCode);
-        countryChanged(function () {
-            $('.state').dropdown('set selected', data.adminName1);
-        });
-    }
-});
-
 
 $('#next').click(function () {
-    if ($('form').form('validate form')) {
+    if ($('#shippingForm').form('validate form')) {
         $('#step1').removeClass('active');
         $('#shipping').transition('fade right', 500, function () {
             $('#billing').transition('fade left');
@@ -212,10 +167,9 @@ $('#back').click(function () {
 });  
 
 var handler = StripeCheckout.configure({
-    key: 'pk_test_z3GSUYh1uvdC1Yzw5fPooyni',
-    token: function(token) {
-        $('stripeToken').text(token.id);
-        $('stripeEmail').text(token.email);
+    key: '{{stripePublic}}',
+    token: function (token) {
+        $('#stripeToken').val(token.id);
         $('#pay').api({
             url: '/checkout/payment',
             method: 'POST',
@@ -236,6 +190,7 @@ var handler = StripeCheckout.configure({
 $('#pay').on('click', function () {
     handler.open({
         name: '{{siteName}}',
+        email: $('input[name=email]').val(),
         amount: {{cart.total.amountMinorInt}}
     });
     return false;
@@ -246,7 +201,7 @@ $(window).on('popstate', function() {
     handler.close();
 });
 
-$('form').form({
+$('#shippingForm').form({
     firstName: {
         identifier: 'firstName',
         rules: [
@@ -262,6 +217,15 @@ $('form').form({
             {
                 type: 'empty',
                 prompt: 'Please enter your last name'
+            }
+        ]
+    },
+    email: {
+        identifier: 'email',
+        rules: [
+            {
+                type: 'email',
+                prompt: 'Please enter a valid email'
             }
         ]
     },

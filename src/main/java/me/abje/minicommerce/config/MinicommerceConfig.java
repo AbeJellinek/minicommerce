@@ -12,6 +12,8 @@ public class MinicommerceConfig {
     private CurrencyUnit currency;
     private String theme;
     private String siteName;
+    private String stripePublic;
+    private String stripeSecret;
 
     public CurrencyUnit getCurrency() {
         return currency;
@@ -46,5 +48,23 @@ public class MinicommerceConfig {
 
     public void setSiteName(String siteName) {
         this.siteName = siteName;
+    }
+
+    @NotNull
+    public String getStripePublic() {
+        return stripePublic;
+    }
+
+    public void setStripePublic(String stripePublic) {
+        this.stripePublic = stripePublic;
+    }
+
+    @NotNull
+    public String getStripeSecret() {
+        return stripeSecret;
+    }
+
+    public void setStripeSecret(String stripeSecret) {
+        this.stripeSecret = stripeSecret;
     }
 }

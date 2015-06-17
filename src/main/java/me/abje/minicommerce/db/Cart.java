@@ -107,6 +107,15 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
                 "} " + super.toString();
     }
 
+    public boolean containsProduct(Product product) {
+        for (Item item : this) {
+            if (item.product.equals(product))
+                return true;
+        }
+
+        return false;
+    }
+
     @Embeddable
     public static class Item {
         @OneToOne

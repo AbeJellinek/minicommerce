@@ -1,5 +1,9 @@
 package me.abje.minicommerce;
 
+import com.google.common.collect.ImmutableMap;
+import com.stripe.Stripe;
+import com.stripe.exception.*;
+import com.stripe.model.Charge;
 import me.abje.minicommerce.config.MinicommerceConfig;
 import me.abje.minicommerce.db.Cart;
 import me.abje.minicommerce.db.CartRepository;
@@ -20,8 +24,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -38,6 +44,11 @@ public class RootController {
 
     @Autowired
     private ProductRepository products;
+
+    @PostConstruct
+    private void postConstruct() {
+        Stripe.apiKey = config.getStripeSecret();
+    }
 
     @ModelAttribute("siteName")
     public String getSiteName() {
@@ -125,6 +136,7 @@ public class RootController {
 
     @RequestMapping(value = "/checkout", method = RequestMethod.GET)
     public String checkout(Model model) {
+        model.addAttribute("stripePublic", config.getStripePublic());
         model.addAttribute("inCart", true);
         model.addAttribute("cartReadOnly", true);
         return "checkout";
@@ -132,19 +144,37 @@ public class RootController {
 
     @RequestMapping(value = "/checkout/payment", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse checkoutPayment() {
+    public SuccessResponse checkoutPayment(@Valid Checkout checkout, HttpSession session) {
         try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
+            ImmutableMap.Builder<String, Object> address = ImmutableMap.<String, Object>builder().
+                    put("line1", checkout.getAddress1()).
+                    put("city", checkout.getCity()).
+                    put("postal_code", checkout.getPostalCode()).
+                    put("country", checkout.getCountry());
+            if (!checkout.getAddress2().isEmpty())
+                address.put("line2", checkout.getAddress2());
+            if (!checkout.getState().isEmpty())
+                address.put("state", checkout.getState());
+            Charge.create(ImmutableMap.of(
+                    "amount", cart(session).getTotal().getAmountMinorInt(),
+                    "currency", config.getCurrencyCode(),
+                    "source", checkout.getStripeToken(),
+                    "shipping", ImmutableMap.of(
+                            "address", address.build(),
+                            "name", checkout.getFirstName() + " " + checkout.getLastName())));
+        } catch (AuthenticationException | APIException | CardException |
+                APIConnectionException | InvalidRequestException e) {
             e.printStackTrace();
+            return new SuccessResponse(false, e.getMessage());
         }
-        return new SuccessResponse(true);
+        return new SuccessResponse(true, "");
     }
 
     @RequestMapping("/product/{id}")
-    public String viewProduct(@PathVariable("id") Product product, Model model) {
+    public String viewProduct(@PathVariable("id") Product product, Model model, HttpSession session) {
         model.addAttribute("inBrowse", true);
         model.addAttribute("product", product);
+        model.addAttribute("canAdd", !cart(session).containsProduct(product));
         return "viewProduct";
     }
 

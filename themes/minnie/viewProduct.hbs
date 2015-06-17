@@ -8,7 +8,11 @@
                     <div class="sub header">{{product.prettyPrice}}</div>
                 </div>
 
-                <div id="addToCart" class="ui large primary button">Add to Cart</div>
+                {{#if canAdd}}
+                    <div id="addToCart" class="ui large primary button">Add to Cart</div>
+                    {{else}}
+                    <div id="addToCart" class="ui disabled large primary button">In Cart</div>
+                {{/if}}
             </h1>
         </div>
         <form class="ui form">
@@ -47,6 +51,20 @@
         method: 'POST',
         onSuccess: function (data) {
             $(document).trigger('updateCart', [data]);
+        }
+    });
+
+    $(document).on('updateCart', function (e, data) {
+        var inCart = false;
+        data.cart.items.forEach(function (item) {
+            if (item.product.id == {{product.id}})
+                inCart = true;
+        });
+
+        if (inCart) {
+            $('#addToCart').state('disable').text('In Cart');
+        } else {
+            $('#addToCart').state('enable').text('Add to Cart');
         }
     });
 </script>

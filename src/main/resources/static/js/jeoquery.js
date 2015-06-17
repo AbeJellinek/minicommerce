@@ -125,34 +125,38 @@ var jeoquery = (function ($) {
 
   $.fn.jeoPostalCodeLookup = function (options) {
     this.on("change", function () {
-      var code = $(this).val();
-      var country = options.country;
-      if (options.countryInput) {
-        country = options.countryInput.val();
-      }
-      if (code) {
-        jeoquery.getGeoNames('postalCodeLookup', {postalcode: code, country: country}, function (data) {
-          if (data && data.postalcodes && data.postalcodes.length > 0) {
-            var code;
-            $.each(data.postalcodes, function (i, postalCode) {
-              if (postalCode.countryCode === 'US') {
-                code = postalCode;
-                return false;
-              }
-            });
-            if (!code)
-              code = data.postalcodes[0];
-            if (options) {
-              if (options.target) {
-                options.target.val(code.placeName);
-              }
-              if (options.callback) {
-                options.callback(code);
+      var self = this;
+      setTimeout(function () {
+      var code = $(self).val();
+        var country = options.country;
+        if (options.countryInput) {
+          country = options.countryInput.val();
+        }
+        var city = options.cityInput.val();
+        if (code) {
+          jeoquery.getGeoNames('postalCodeLookup', {postalcode: code, country: country, placename: city}, function (data) {
+            if (data && data.postalcodes && data.postalcodes.length > 0) {
+              var code;
+              $.each(data.postalcodes, function (i, postalCode) {
+                if (postalCode.countryCode === 'US') {
+                  code = postalCode;
+                  return false;
+                }
+              });
+              if (!code)
+                code = data.postalcodes[0];
+              if (options) {
+                if (options.target) {
+                  options.target.val(code.placeName);
+                }
+                if (options.callback) {
+                  options.callback(code);
+                }
               }
             }
-          }
-        });
-      }
+          });
+        }
+      }, 100);
     });
   };
 

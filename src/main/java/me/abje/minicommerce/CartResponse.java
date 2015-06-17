@@ -6,7 +6,7 @@ public class CartResponse extends SuccessResponse {
     private final Cart cart;
 
     public CartResponse(boolean success, Cart cart) {
-        super(success);
+        super(success, "");
         this.cart = cart;
     }
 
