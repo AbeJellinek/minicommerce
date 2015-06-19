@@ -71,6 +71,9 @@ public class RootController {
             ResourceBundle bundle = ResourceBundle.getBundle("messages", locale);
             return new MessageFormat(bundle.getString(context), locale).format(options.params);
         });
+
+        handlebarsViewResolver.<CurrencyUnit>registerHelper("currencyName", (context, options) ->
+                context.toCurrency().getDisplayName(LocaleContextHolder.getLocale()));
     }
 
     @ModelAttribute("siteName")

@@ -2,12 +2,12 @@
     <div class="hero image" style="background-image: url('/img/header.jpg')">
         <h1>{{siteName}}</h1>
         <div class="ui currency selection dropdown">
-            <div class="default text"><i class="money icon"></i> {{i "currency"}}</div>
+            <div class="default text">{{userCurrency}}</div>
             <i class="dropdown icon"></i>
             <div class="menu">
-                <div class="item" data-value="{{defaultCurrency.code}}">{{defaultCurrency.code}}</div>
+                <div class="item" data-value="{{defaultCurrency.code}}">{{currencyName defaultCurrency}} <span class="description">Default</span></div>
                 {{#each currencies}}
-                    <div class="item" data-value="{{code}}">{{code}}</div>
+                    <div class="item" data-value="{{code}}">{{currencyName this}}</div>
                 {{/each}}
             </div>
         </div>
