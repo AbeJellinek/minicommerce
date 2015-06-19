@@ -12,10 +12,13 @@ import me.abje.minicommerce.db.ProductRepository;
 import me.abje.minicommerce.money.CurrencyConverter;
 import me.abje.minicommerce.money.Rate;
 import me.abje.minicommerce.money.RatesResponse;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.embedded.ErrorPage;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -61,7 +64,7 @@ public class RootController {
     }
 
     @ModelAttribute("cart")
-    public Cart cart(HttpSession session) {
+    public Cart getCart(HttpSession session) {
         Integer cartId = (Integer) session.getAttribute("cart");
         Cart cart;
         if (cartId == null) {
@@ -76,12 +79,12 @@ public class RootController {
     @RequestMapping("/")
     public String index(Model model) {
         model.addAttribute("inBrowse", true);
-        model.addAttribute("products", products.findAll());
+        model.addAttribute("products", products.findAll(new Sort(Sort.Direction.ASC, "name")));
         return "index";
     }
 
     @RequestMapping("/cart")
-    public String cart(Model model) {
+    public String viewCart(Model model) {
         model.addAttribute("inCart", true);
         return "cart";
     }
@@ -89,9 +92,7 @@ public class RootController {
     @RequestMapping(value = "/cart/quantity/{id}/{quantity}", method = RequestMethod.POST)
     @ResponseBody
     public SuccessResponse updateQuantity(@PathVariable("id") int id, @PathVariable("quantity") int quantity,
-                                          HttpSession session) {
-        Cart cart = cart(session);
-
+                                          Cart cart) {
         for (ListIterator<Cart.Item> iterator = cart.getItems().listIterator(); iterator.hasNext(); ) {
             Cart.Item item = iterator.next();
             if (item.getProduct().getId() == id) {
@@ -111,8 +112,7 @@ public class RootController {
 
     @RequestMapping(value = "/cart/add/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse addToCart(@PathVariable("id") Product product, HttpSession session) {
-        Cart cart = cart(session);
+    public SuccessResponse addToCart(@PathVariable("id") Product product, Cart cart) {
         cart.add(product, 1);
         carts.save(cart);
         return new CartResponse(true, cart);
@@ -120,8 +120,7 @@ public class RootController {
 
     @RequestMapping(value = "/cart/remove/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse removeFromCart(@PathVariable("id") int id, HttpSession session) {
-        Cart cart = cart(session);
+    public SuccessResponse removeFromCart(@PathVariable("id") int id, Cart cart) {
         for (ListIterator<Cart.Item> iterator = cart.getItems().listIterator(); iterator.hasNext(); ) {
             Cart.Item item = iterator.next();
             if (item.getProduct().getId() == id) {
@@ -135,7 +134,10 @@ public class RootController {
     }
 
     @RequestMapping(value = "/checkout", method = RequestMethod.GET)
-    public String checkout(Model model) {
+    public String checkout(Model model, Cart cart) {
+        if (cart.getTotalQuantity() == 0)
+            return "redirect:/";
+
         model.addAttribute("stripePublic", config.getStripePublic());
         model.addAttribute("inCart", true);
         model.addAttribute("cartReadOnly", true);
@@ -144,7 +146,10 @@ public class RootController {
 
     @RequestMapping(value = "/checkout/payment", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse checkoutPayment(@Valid Checkout checkout, HttpSession session) {
+    public SuccessResponse checkoutPayment(@Valid Checkout checkout, Cart cart) {
+        if (cart.getTotalQuantity() == 0)
+            return new SuccessResponse(false, "Your cart is empty.");
+
         try {
             ImmutableMap.Builder<String, Object> address = ImmutableMap.<String, Object>builder().
                     put("line1", checkout.getAddress1()).
@@ -156,7 +161,7 @@ public class RootController {
             if (!checkout.getState().isEmpty())
                 address.put("state", checkout.getState());
             Charge.create(ImmutableMap.of(
-                    "amount", cart(session).getTotal().getAmountMinorInt(),
+                    "amount", cart.getTotal().getAmountMinorInt(),
                     "currency", config.getCurrencyCode(),
                     "source", checkout.getStripeToken(),
                     "shipping", ImmutableMap.of(
@@ -171,16 +176,34 @@ public class RootController {
     }
 
     @RequestMapping("/product/{id}")
-    public String viewProduct(@PathVariable("id") Product product, Model model, HttpSession session) {
+    public String viewProduct(@PathVariable("id") Product product, Model model, Cart cart) {
         model.addAttribute("inBrowse", true);
         model.addAttribute("product", product);
-        model.addAttribute("canAdd", !cart(session).containsProduct(product));
+        model.addAttribute("canAdd", !cart.containsProduct(product));
         return "viewProduct";
     }
 
     @RequestMapping("/login")
     public String login() {
         return "th/login";
+    }
+
+    @RequestMapping("/currency/set/{currencyCode}")
+    @ResponseBody
+    public SuccessResponse setCurrency(@PathVariable("currencyCode") String currencyCode, HttpSession session) {
+        CurrencyUnit currency = CurrencyUnit.of(currencyCode);
+        session.setAttribute("currency", currency);
+        return new SuccessResponse(true, "");
+    }
+
+    @RequestMapping("/currency/convert/{amount}")
+    @ResponseBody
+    public String convertCurrency(@PathVariable("amount") String amount, HttpSession session) {
+        CurrencyUnit currency = (CurrencyUnit) session.getAttribute("currency");
+        if (currency == null || currency.equals(config.getCurrency()))
+            return "";
+        return CurrencyConverter.prettify(converter.convertTo(Money.of(config.getCurrency(),
+                Double.parseDouble(amount.replaceAll("[^0-9\\.]", ""))), currency));
     }
 
     @Bean

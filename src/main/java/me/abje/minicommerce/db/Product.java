@@ -18,9 +18,10 @@ public class Product extends ModelBase {
     @JsonIgnore
     private String description;
 
-    public Product(String name, Money price) {
+    public Product(String name, Money price, String description) {
         this.name = name;
         this.price = price;
+        this.description = description;
     }
 
     protected Product() {
@@ -47,6 +48,14 @@ public class Product extends ModelBase {
         return CurrencyConverter.prettify(price);
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -54,12 +63,13 @@ public class Product extends ModelBase {
         if (!super.equals(o)) return false;
         Product product = (Product) o;
         return Objects.equals(name, product.name) &&
-                Objects.equals(price, product.price);
+                Objects.equals(price, product.price) &&
+                Objects.equals(description, product.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, price);
+        return Objects.hash(super.hashCode(), name, price, description);
     }
 
     @Override
@@ -67,6 +77,7 @@ public class Product extends ModelBase {
         return "Product{" +
                 "name='" + name + '\'' +
                 ", price=" + price +
+                ", description='" + description + '\'' +
                 "} " + super.toString();
     }
 }

@@ -4,6 +4,7 @@ import me.abje.minicommerce.config.MinicommerceConfig;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -50,7 +51,7 @@ public class CurrencyConverter {
     }
 
     public static String prettify(Money money) {
-        NumberFormat format = NumberFormat.getCurrencyInstance();
+        NumberFormat format = NumberFormat.getCurrencyInstance(LocaleContextHolder.getLocale());
         format.setCurrency(money.getCurrencyUnit().toCurrency());
         return format.format(money.getAmount());
     }

@@ -33,7 +33,7 @@
         {{#unless inCart}}
         <div class="ui flowing popup">
             {{> cartFragment}}
-            <a href="/checkout" class="ui right floated tiny icon button"><i class="right arrow icon"></i></a>
+            <a id="miniCheckoutButton" href="/checkout" class="ui right floated tiny {{#unless cart.totalQuantity}}disabled{{/unless}} icon button"><i class="right arrow icon"></i></a>
         </div>
         {{/unless}}
     </div>
@@ -45,12 +45,26 @@
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.3/semantic.min.js"></script>
 <script type="text/javascript">
+    $('.ui.dropdown').dropdown();
+
     $.fn.api.settings.successTest = function(response) {
         if(response && response.success) {
             return response.success;
         }
         return false;
     };
+
+    $(document).on('updateCart', function (event, data) {
+        if (data.cart.totalQuantity > 0) {
+            $('#miniCheckoutButton').removeClass('disabled');
+        } else {
+            $('#miniCheckoutButton').addClass('disabled');
+        }
+
+        setTimeout(function () {
+            $('.price').each(annotatePrice);
+        }, 10); // I hate JavaScript.
+    });
 
     $('#cartButton:not(.active)')
         .popup({
@@ -61,7 +75,35 @@
                 show: 100,
                 hide: 500
             }
-        })
+        });
+
+    function annotatePrice(i, elem) {
+        var $elem = $(elem);
+        $elem.popup('destroy');
+        $.get('/currency/convert/' + $elem.text()).then(function (price) {
+            $elem.popup('destroy');
+            $elem.popup({
+                content: price,
+                exclusive: false,
+                position: 'bottom center'
+            });
+        });
+    }
+
+    $('.price').each(annotatePrice);
+
+    $('.currency.selection').dropdown({
+        onChange: function () {
+            $(this).api({
+                url: '/currency/set/{value}',
+                method: 'POST',
+                on: 'now',
+                onSuccess: function () {
+                    location.reload();
+                }
+            });
+        }
+    });
 </script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.3/handlebars.min.js"></script>
 {{#block "scripts"}}{{/block}}

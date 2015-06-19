@@ -2,10 +2,10 @@
 <div class="ui page grid">
     <div class="sixteen wide column">
         <div class="ui top attached segment">
-            <h1 class="ui center aligned header">
+            <h1 class="ui center aligned header" style="margin-bottom: 0 !important">
                 <div class="content">
                     {{product.name}}
-                    <div class="sub header">{{product.prettyPrice}}</div>
+                    <div class="sub header price">{{product.prettyPrice}}</div>
                 </div>
 
                 {{#if canAdd}}
@@ -16,22 +16,12 @@
             </h1>
         </div>
         <form class="ui form">
-            <div class="ui bottom attached one column grid segment">
-                {{!-- <div class="center aligned column">
-                    <div class="product options">
-                        <div class="inline field">
-                            <label>Some Choice</label>
-                            <select class="ui selection dropdown">
-                                <option value="0">Option 1</option>
-                                <option value="1">Option 2</option>
-                            </select>
-                        </div>
-                    </div>
-                </div> --}}
-                <div class="column">
-                    Pictures go here.<br>
-
-                    <b>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Vel libero vero delectus, ab repudiandae ullam, optio voluptates similique sapiente!</b> Aperiam perspiciatis ipsa saepe exercitationem tempora laudantium quibusdam nisi dolore quo. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Animi, dolor repellat aperiam nam sit? Ea molestiae rem est sunt eligendi beatae repellat similique odio excepturi voluptatibus commodi perspiciatis sed, quos!
+            <div class="ui bottom attached grid segment">
+                <div class="seven wide column">
+                    <img class="ui image" src="https://placehold.it/440x300">
+                </div>
+                <div class="nine wide column">
+                    {{{product.description}}}
                 </div>
             </div>
         </form>
@@ -41,8 +31,6 @@
 
 {{#partial "scripts"}}
 <script type="text/javascript">
-    $('.ui.dropdown').dropdown();
-
     $('#addToCart').api({
         url: '/cart/add/{id}',
         urlData: {

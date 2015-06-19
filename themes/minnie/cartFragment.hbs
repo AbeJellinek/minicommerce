@@ -12,7 +12,7 @@
     {{/each}}
     <tr class="positive">
         <td><b>Total</b></td>
-        <td class="cartTotal">{{cart.prettyTotal}}</td>
+        <td class="cartTotal price">{{cart.prettyTotal}}</td>
         <td></td>
     </tr>
   </tbody>
@@ -79,7 +79,8 @@
                     $body.children().remove(".cartItem");
                     var newItems = [];
                     $.each(data.cart.items, function (i, item) {
-                        newItems.push($(Handlebars.templates['cartItem'](item)));
+                        var newItem = $(Handlebars.templates['cartItem'](item));
+                        newItems.push(newItem);
                     });
                     $body.prepend(newItems);
                 });

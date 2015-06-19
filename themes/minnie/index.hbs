@@ -2,6 +2,21 @@
     <div class="hero image" style="background-image: url('/img/header.jpg')"><h1>{{siteName}}</h1></div>
 
     <div class="ui page grid">
+        <div class="right floated three wide column">
+            <div class="ui fluid currency selection dropdown">
+                <div class="default text">USD</div>
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <div class="item" data-value="USD">US Dollar</div>
+                    <div class="item" data-value="JPY">Japanese Yen</div>
+                    <div class="item" data-value="GBP">British Pound</div>
+                    <div class="item" data-value="CHF">Swiss Franc</div>
+                    <div class="item" data-value="AUD">Australian Dollar</div>
+                    <div class="item" data-value="CAD">Canadian Dollar</div>
+                </div>
+            </div>
+        </div>
+
         {{#each products}}
             <div class="four wide column">
                 <a href="/product/{{id}}">
@@ -13,7 +28,7 @@
                         {{/if}}
                         <div class="content">
                             <div class="header">{{name}}</div>
-                            <div class="meta">{{prettyPrice}}</div>
+                            <div class="meta"><span class="price">{{prettyPrice}}</span></div>
                         </div>
                     </div>
                 </a>

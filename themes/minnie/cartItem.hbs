@@ -1,6 +1,6 @@
 <tr class="cartItem">
     <td>{{product.name}}</td>
-    <td>{{product.prettyPrice}}</td>
+    <td class="price">{{product.prettyPrice}}</td>
     <td>
         <div data-item="{{product.id}}" class="ui small icon input">
             <input {{#if cartReadOnly}}readonly{{/if}} class="changeQuantity" type="number" min="1" value="{{quantity}}">

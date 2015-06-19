@@ -9,10 +9,22 @@
         </div>
         <div class="ui bottom attached segment">
             <a href="/" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> Back</a>
-            <a href="/checkout" class="ui primary right floated right labeled icon button">Checkout <i class="right arrow icon"></i></a>
+            <a id="bigCheckoutButton" href="/checkout" class="ui primary right floated {{#unless cart.totalQuantity}}disabled{{/unless}} right labeled icon button">Checkout <i class="right arrow icon"></i></a>
         </div>
     </div>
 </div>
+{{/partial}}
+
+{{#partial "scripts"}}
+<script type="text/javascript">
+    $(document).on('updateCart', function (event, data) {
+        if (data.cart.totalQuantity > 0) {
+            $('#bigCheckoutButton').removeClass('disabled');
+        } else {
+            $('#bigCheckoutButton').addClass('disabled');
+        }
+    });
+</script>
 {{/partial}}
 
 {{> layout title='Cart'}}
