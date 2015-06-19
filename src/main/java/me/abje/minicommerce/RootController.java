@@ -1,5 +1,6 @@
 package me.abje.minicommerce;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.stripe.Stripe;
 import com.stripe.exception.*;
@@ -31,8 +32,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 @Controller
 public class RootController {
@@ -48,14 +48,26 @@ public class RootController {
     @Autowired
     private ProductRepository products;
 
+    private List<CurrencyUnit> currencies;
+
     @PostConstruct
     private void postConstruct() {
         Stripe.apiKey = config.getStripeSecret();
+
+        currencies = new ArrayList<>(Arrays.asList(CurrencyUnit.of("USD"), CurrencyUnit.of("JPY"), CurrencyUnit.of("GBP"),
+                CurrencyUnit.of("CHF"), CurrencyUnit.of("AUD"), CurrencyUnit.of("CAD"), CurrencyUnit.of("MXN")));
+        currencies.sort(Comparator.naturalOrder());
+        currencies.remove(config.getCurrency());
     }
 
     @ModelAttribute("siteName")
     public String getSiteName() {
         return config.getSiteName();
+    }
+
+    @ModelAttribute("currencies")
+    public List<CurrencyUnit> getCurrencies() {
+        return currencies;
     }
 
     @ModelAttribute("_csrf")
@@ -74,6 +86,16 @@ public class RootController {
             cart = carts.findOne(cartId);
         }
         return cart;
+    }
+
+    @ModelAttribute("defaultCurrency")
+    public CurrencyUnit getDefaultCurrency() {
+        return config.getCurrency();
+    }
+
+    @ModelAttribute("userCurrency")
+    public CurrencyUnit getCurrency(HttpSession session) {
+        return (CurrencyUnit) session.getAttribute("currency");
     }
 
     @RequestMapping("/")
@@ -219,10 +241,12 @@ public class RootController {
 
     @Scheduled(fixedRate = 24 /* hours */ * 60 /* minutes */ * 60 /* seconds */ * 1000 /* milliseconds */)
     public void updateConversionRates() {
+        String joined = Joiner.on(", ").appendTo(new StringBuilder("("), currencies.stream().map(currency ->
+                "\"" + config.getCurrencyCode() + currency.getCode() + "\"").iterator()).append(')').toString();
         RestTemplate restTemplate = new RestTemplate();
         RatesResponse ratesResponse = restTemplate.getForObject("http://query.yahooapis.com/v1/public/yql?q=" +
                 "select * from yahoo.finance.xchange where pair in " +
-                String.format("(\"%1$sUSD\", \"%1$sEUR\", \"%1$sJPY\", \"%1$sGBP\", \"%1$sCHF\", \"%1$sAUD\", \"%1$sCAD\")", config.getCurrencyCode()) +
+                joined +
                 "&env=store://datatables.org/alltableswithkeys&format=json", RatesResponse.class);
         RatesResponse.Query query = ratesResponse.query;
         List<Rate> rates = query.results.get("rate");

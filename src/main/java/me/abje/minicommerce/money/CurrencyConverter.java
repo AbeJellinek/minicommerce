@@ -41,7 +41,7 @@ public class CurrencyConverter {
     }
 
     public Money convertTo(Money money, CurrencyUnit currency) {
-        if (money.getCurrencyUnit().equals(currency))
+        if (money.getCurrencyUnit().equals(currency) || !rates.containsKey(currency))
             return money;
         return money.convertedTo(currency, BigDecimal.valueOf(rates.get(currency)), RoundingMode.HALF_UP);
     }

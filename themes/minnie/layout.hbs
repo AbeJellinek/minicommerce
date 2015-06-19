@@ -33,7 +33,10 @@
         {{#unless inCart}}
         <div class="ui flowing popup">
             {{> cartFragment}}
-            <a id="miniCheckoutButton" href="/checkout" class="ui right floated tiny {{#unless cart.totalQuantity}}disabled{{/unless}} icon button"><i class="right arrow icon"></i></a>
+            <div style="float: right">
+                <a href="/cart" class="ui tiny icon button"><i class="expand icon"></i></a>
+                <a id="miniCheckoutButton" href="/checkout" class="ui tiny {{#unless cart.totalQuantity}}disabled{{/unless}} icon button"><i class="right arrow icon"></i></a>
+            </div>
         </div>
         {{/unless}}
     </div>
@@ -80,13 +83,18 @@
     function annotatePrice(i, elem) {
         var $elem = $(elem);
         $elem.popup('destroy');
-        $.get('/currency/convert/' + $elem.text()).then(function (price) {
+        var oldPrice = $elem.data('price') || $elem.text();
+        $.get('/currency/convert/' + oldPrice).then(function (price) {
             $elem.popup('destroy');
-            $elem.popup({
-                content: price,
-                exclusive: false,
-                position: 'bottom center'
-            });
+            if (price) {
+                $elem.popup({
+                    content: oldPrice,
+                    exclusive: false,
+                    position: 'bottom center'
+                });
+                $elem.data('price', oldPrice);
+                $elem.text(price);
+            }
         });
     }
 

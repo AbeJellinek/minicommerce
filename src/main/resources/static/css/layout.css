@@ -8,17 +8,19 @@
     height: 250px;
     background-repeat: no-repeat;
     background-position: center;
-    text-align: center;
 }
 
 .hero.image>h1 {
+    text-align: center;
     line-height: 250px;
     font-size: 50px;
     color: white;
 }
 
-.product.options {
-    margin-bottom: 10px;
+.hero.image>.dropdown {
+    position: absolute;
+    top: 39px;
+    right: 10px;
 }
 
 #addToCart {
