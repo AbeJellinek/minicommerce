@@ -14,6 +14,7 @@ import me.abje.minicommerce.db.ProductRepository;
 import me.abje.minicommerce.money.CurrencyConverter;
 import me.abje.minicommerce.money.Rate;
 import me.abje.minicommerce.money.RatesResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class RootController {
@@ -242,6 +244,23 @@ public class RootController {
             return "";
         return CurrencyConverter.prettify(converter.convertTo(Money.of(config.getCurrency(),
                 Double.parseDouble(amount.replaceAll("[^0-9\\.]", ""))), currency));
+    }
+
+    @RequestMapping("/search/{query}")
+    @ResponseBody
+    public SearchResponse search(@PathVariable("query") String query, HttpSession session) {
+        List<Product> productList = products.findByNameContaining(query);
+        CurrencyUnit currency = (CurrencyUnit) session.getAttribute("currency");
+
+        List<SearchResponse.Result> results =
+                productList.stream().map(product ->
+                        new SearchResponse.Result(
+                                product.getName(),
+                                "/product/" + product.getId(),
+                                CurrencyConverter.prettify(converter.convertTo(product.getPrice(), currency)),
+                                StringUtils.abbreviate(product.getDescription(), 100))).
+                        collect(Collectors.toList());
+        return new SearchResponse(true, results);
     }
 
     @Bean

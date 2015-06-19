@@ -22,9 +22,12 @@
 
     <div class="right menu">
         <div class="item">
-            <div class="ui transparent icon input">
-                <input type="text" placeholder="{{i "searchPlaceholder"}}">
-                <i class="search link icon"></i>
+            <div class="ui search">
+                <div class="ui transparent icon input">
+                    <input class="prompt" type="text" placeholder="{{i "searchPlaceholder"}}">
+                    <i class="search icon"></i>
+                </div>
+                <div class="results"></div>
             </div>
         </div>
         <a id="cartButton" href="/cart" class="{{#if inCart}}active{{/if}} item">
@@ -110,6 +113,12 @@
                     location.reload();
                 }
             });
+        }
+    });
+
+    $('.ui.search').search({
+        apiSettings: {
+            url: '/search/{query}'
         }
     });
 </script>
