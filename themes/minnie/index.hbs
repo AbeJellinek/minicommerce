@@ -2,7 +2,7 @@
     <div class="hero image" style="background-image: url('/img/header.jpg')">
         <h1>{{siteName}}</h1>
         <div class="ui currency selection dropdown">
-            <div class="default text"><i class="money icon"></i> Currency</div>
+            <div class="default text"><i class="money icon"></i> {{i "currency"}}</div>
             <i class="dropdown icon"></i>
             <div class="menu">
                 <div class="item" data-value="{{defaultCurrency.code}}">{{defaultCurrency.code}}</div>
@@ -14,10 +14,6 @@
     </div>
 
     <div class="ui page grid">
-        <div class="right floated four wide column">
-            
-        </div>
-
         {{#each products}}
             <div class="four wide column">
                 <a href="/product/{{id}}">

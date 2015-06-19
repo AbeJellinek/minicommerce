@@ -9,9 +9,9 @@
                 </div>
 
                 {{#if canAdd}}
-                    <div id="addToCart" class="ui large primary button">Add to Cart</div>
+                    <div id="addToCart" class="ui large primary button">{{i "addToCart"}}</div>
                     {{else}}
-                    <div id="addToCart" class="ui disabled large primary button">In Cart</div>
+                    <div id="addToCart" class="ui disabled large primary button">{{i "inCart"}}</div>
                 {{/if}}
             </h1>
         </div>
@@ -50,9 +50,9 @@
         });
 
         if (inCart) {
-            $('#addToCart').state('disable').text('In Cart');
+            $('#addToCart').state('disable').text('{{i "inCart"}}');
         } else {
-            $('#addToCart').state('enable').text('Add to Cart');
+            $('#addToCart').state('enable').text('{{i "addToCart"}}');
         }
     });
 </script>
