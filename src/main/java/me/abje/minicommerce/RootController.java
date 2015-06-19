@@ -1,5 +1,6 @@
 package me.abje.minicommerce;
 
+import com.github.jknack.handlebars.springmvc.HandlebarsViewResolver;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.stripe.Stripe;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.embedded.ErrorPage;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,6 +34,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.text.MessageFormat;
 import java.util.*;
 
 @Controller
@@ -50,6 +53,10 @@ public class RootController {
 
     private List<CurrencyUnit> currencies;
 
+    @Autowired
+    private HandlebarsViewResolver handlebarsViewResolver;
+
+
     @PostConstruct
     private void postConstruct() {
         Stripe.apiKey = config.getStripeSecret();
@@ -58,6 +65,12 @@ public class RootController {
                 CurrencyUnit.of("CHF"), CurrencyUnit.of("AUD"), CurrencyUnit.of("CAD"), CurrencyUnit.of("MXN")));
         currencies.sort(Comparator.naturalOrder());
         currencies.remove(config.getCurrency());
+
+        handlebarsViewResolver.<String>registerHelper("i", (context, options) -> {
+            Locale locale = LocaleContextHolder.getLocale();
+            ResourceBundle bundle = ResourceBundle.getBundle("messages", locale);
+            return new MessageFormat(bundle.getString(context), locale).format(options.params);
+        });
     }
 
     @ModelAttribute("siteName")

@@ -1,9 +1,9 @@
 <table class="ui table">
   <thead>
     <tr>
-        <th>Item</th>
-        <th>Price</th>
-        <th>Quantity</th>
+        <th>{{i "item"}}</th>
+        <th>{{i "price"}}</th>
+        <th>{{i "quantity"}}</th>
     </tr>
   </thead>
   <tbody class="cartBody">
@@ -11,7 +11,7 @@
     {{> cartItem}}
     {{/each}}
     <tr class="positive">
-        <td><b>Total</b></td>
+        <td><b>{{i "total"}}</b></td>
         <td class="cartTotal price">{{cart.prettyTotal}}</td>
         <td></td>
     </tr>

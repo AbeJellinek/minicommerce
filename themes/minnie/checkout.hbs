@@ -5,25 +5,25 @@
         <div class="ui page grid">
             <div class="centered twelve wide column">
                 <h1 class="ui centered header">
-                    Checkout
+                    {{i "checkout"}}
                 </h1>
 
                 <div class="ui three ordered steps">
                   <div id="step1" class="active step">
                     <div class="content">
-                      <div class="title">Shipping</div>
-                      <div class="description">Enter name and address</div>
+                      <div class="title">{{i "shipping"}}</div>
+                      <div class="description">{{i "shippingDescription"}}</div>
                     </div>
                   </div>
                   <div id="step2" class="step">
                     <div class="content">
-                      <div class="title">Billing</div>
-                      <div class="description">Enter payment information</div>
+                      <div class="title">{{i "billing"}}</div>
+                      <div class="description">{{i "billingDescription"}}</div>
                     </div>
                   </div>
                   <div id="step3" class="step">
                     <div class="content">
-                      <div class="title">Done!</div>
+                      <div class="title">{{i "done"}}</div>
                     </div>
                   </div>
                 </div>
@@ -32,56 +32,56 @@
             <div id="shipping" class="sixteen wide column">
                 <div class="ui top attached segment">
                     <div id="shippingForm" class="ui form">
-                        <h3 class="ui dividing header">Shipping Address</h3>
+                        <h3 class="ui dividing header">{{i "shippingAddress"}}</h3>
                         <div class="required field">
-                            <label>Name</label>
+                            <label>{{i "name"}}</label>
                             <div class="two fields">
                                 <div id="firstNameField" class="field">
-                                    <input type="text" name="firstName" placeholder="First Name">
+                                    <input type="text" name="firstName" placeholder="{{i "firstName"}}">
                                 </div>
                                 <div class="field">
-                                    <input type="text" name="lastName" placeholder="Last Name">
+                                    <input type="text" name="lastName" placeholder="{{i "lastName"}}">
                                 </div>
                             </div>
                         </div>
 
                         <div class="required field">
-                            <label>Email</label>
-                            <input type="email" name="email" placeholder="Email">
+                            <label>{{i "email"}}</label>
+                            <input type="email" name="email" placeholder="{{i "email"}}">
                         </div>
 
                         <div class="required field">
-                            <label>Street Address</label>
-                            <input type="text" name="address1" id="address1" placeholder="Street Address">
+                            <label>{{i "streetAddress"}}</label>
+                            <input type="text" name="address1" id="address1" placeholder="{{i "streetAddress"}}">
                         </div>
 
                         <div class="field">
-                            <label>Address Line 2</label>
-                            <input type="text" name="address2" placeholder="Apt, Suite, Bldg.">
+                            <label>{{i "addressLine2"}}</label>
+                            <input type="text" name="address2" placeholder="{{i "addressLine2"}}">
                         </div>
 
                         <div class="two fields">
                             <div class="required field">
-                                <label>Postal Code</label>
-                                <input id="postalCode" name="postalCode" type="text" placeholder="Postal Code">
+                                <label>{{i "postalCode"}}</label>
+                                <input id="postalCode" name="postalCode" type="text" placeholder="{{i "postalCode"}}">
                             </div>
 
                             <div class="required field">
-                                <label>City</label>
-                                <input id="city" name="city" type="text" placeholder="City">
+                                <label>{{i "city"}}</label>
+                                <input id="city" name="city" type="text" placeholder="{{i "city"}}">
                             </div>
                         </div>
 
                         <div class="two fields">
                             <div class="required field">
-                                <label>Country</label>
+                                <label>{{i "country"}}</label>
                                 <select name="country" class="ui input country">
                                 </select>
                             </div>
 
                             <div class="field">
-                                <label>State/Province</label>
-                                <input class="state" name="state" type="text" placeholder="State">
+                                <label>{{i "stateProvince"}}</label>
+                                <input class="state" name="state" type="text" placeholder="{{i "stateProvince"}}">
                             </div>
                         </div>
                         <div class="ui error message"></div>
@@ -89,39 +89,39 @@
                 </div>
 
                 <div class="ui bottom attached segment">
-                    <a href="/cart" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> Back</a>
-                    <a href="#" id="next" class="ui primary right floated right labeled icon button">Next <i class="right arrow icon"></i></a>
+                    <a href="/cart" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
+                    <a href="#" id="next" class="ui primary right floated right labeled icon button">{{i "next"}} <i class="right arrow icon"></i></a>
                 </div>
             </div>
 
             <div id="billing" class="sixteen wide column" style="display:none;">
                 <div class="ui top attached segment">
                     <div class="ui form">
-                        <h3 class="ui dividing header">Billing</h3>
+                        <h3 class="ui dividing header">{{i "billing"}}</h3>
 
                         {{> cartFragment}}
 
-                        <p>Your payment is securely processed by <a href="http://stripe.com">Stripe</a>.</p>
+                        <p>{{{i "stripeMessage"}}}</p>
                         <input type="hidden" name="stripeToken" id="stripeToken">
                     </div>
                 </div>
 
                 <div class="ui bottom attached segment">
-                    <a id="back" href="#" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> Back</a>
-                    <a id="pay" href="#" class="ui primary right floated button">Pay with Card</a>
+                    <a id="back" href="#" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
+                    <a id="pay" href="#" class="ui primary right floated button">{{i "payWithCard"}}</a>
                 </div>
             </div>
 
             <div id="done" class="sixteen wide column" style="display:none;">
                 <div class="ui top attached segment">
                     <div class="ui form">
-                        <h3 class="ui dividing header">Success</h3>
-                        <p><b>Thank you!</b> Your order was completed successfully.</p>
+                        <h3 class="ui dividing header">{{i "success"}}</h3>
+                        <p>{{{i "orderSuccessful"}}}</p>
                     </div>
                 </div>
 
                 <div class="ui bottom attached segment">
-                    <a href="/" class="ui primary right floated button">Done</a>
+                    <a href="/" class="ui primary right floated button">{{i "done"}}</a>
                 </div>
             </div>
         </div>
@@ -204,7 +204,7 @@ $('#shippingForm').form({
         rules: [
             {
                 type: 'empty',
-                prompt: 'Please enter your first name'
+                prompt: '{{i "errorFirstName"}}'
             }
         ]
     },
@@ -213,7 +213,7 @@ $('#shippingForm').form({
         rules: [
             {
                 type: 'empty',
-                prompt: 'Please enter your last name'
+                prompt: '{{i "errorLastName"}}'
             }
         ]
     },
@@ -222,7 +222,7 @@ $('#shippingForm').form({
         rules: [
             {
                 type: 'email',
-                prompt: 'Please enter a valid email'
+                prompt: '{{i "errorEmail"}}'
             }
         ]
     },
@@ -231,7 +231,7 @@ $('#shippingForm').form({
         rules: [
             {
                 type: 'empty',
-                prompt: 'Please enter a valid street address'
+                prompt: '{{i "errorAddress1"}}'
             }
         ]
     },
@@ -240,7 +240,7 @@ $('#shippingForm').form({
         rules: [
             {
                 type: 'empty',
-                prompt: 'Please enter a valid postal code'
+                prompt: '{{i "errorPostalCode"}}'
             }
         ]
     },
@@ -249,7 +249,7 @@ $('#shippingForm').form({
         rules: [
             {
                 type: 'empty',
-                prompt: 'Please enter a valid city'
+                prompt: '{{i "errorCity"}}'
             }
         ]
     },
@@ -258,7 +258,7 @@ $('#shippingForm').form({
         rules: [
             {
                 type: 'empty',
-                prompt: 'Please enter a valid country'
+                prompt: '{{i "errorCountry"}}'
             }
         ]
     }
@@ -266,4 +266,4 @@ $('#shippingForm').form({
 </script>
 {{/partial}}
 
-{{> layout title='Checkout'}}
+{{> layout title=(i "checkout")}}
