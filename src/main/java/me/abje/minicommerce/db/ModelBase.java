@@ -22,7 +22,7 @@ public class ModelBase {
      * The date/time that this object was created.
      */
     @NotNull
-    private final long created;
+    private long created;
 
     public ModelBase() {
         created = System.currentTimeMillis();
@@ -38,6 +38,14 @@ public class ModelBase {
 
     public long getCreated() {
         return created;
+    }
+
+    public void setVersion(int version) {
+        this.version = version;
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
     }
 
     @Override

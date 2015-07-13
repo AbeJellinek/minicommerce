@@ -20,8 +20,7 @@ public class Checkout {
     @NotNull
     private String country;
     private String state;
-    @NotNull
-    private String stripeToken;
+    private PaymentMethod payment;
 
     public String getFirstName() {
         return firstName;
@@ -95,12 +94,12 @@ public class Checkout {
         this.state = state;
     }
 
-    public String getStripeToken() {
-        return stripeToken;
+    public void setStripeToken(@NotNull String stripeToken) {
+        this.payment = new StripePaymentMethod(stripeToken);
     }
 
-    public void setStripeToken(String stripeToken) {
-        this.stripeToken = stripeToken;
+    public PaymentMethod getPayment() {
+        return payment;
     }
 
     @Override
@@ -117,12 +116,12 @@ public class Checkout {
                 Objects.equals(city, checkout.city) &&
                 Objects.equals(country, checkout.country) &&
                 Objects.equals(state, checkout.state) &&
-                Objects.equals(stripeToken, checkout.stripeToken);
+                Objects.equals(payment, checkout.payment);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, lastName, email, address1, address2, postalCode, city, country, state, stripeToken);
+        return Objects.hash(firstName, lastName, email, address1, address2, postalCode, city, country, state, payment);
     }
 
     @Override
@@ -137,7 +136,7 @@ public class Checkout {
                 ", city='" + city + '\'' +
                 ", country='" + country + '\'' +
                 ", state='" + state + '\'' +
-                ", stripeToken='" + stripeToken + '\'' +
+                ", payment='" + payment + '\'' +
                 '}';
     }
 }

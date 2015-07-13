@@ -21,6 +21,7 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
     private List<Item> items;
     @JsonIgnore
     private CurrencyUnit currency;
+    private boolean old;
 
     public Cart() {
         this(null, null);
@@ -90,13 +91,14 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Cart items1 = (Cart) o;
-        return Objects.equals(items, items1.items) &&
+        return Objects.equals(old, items1.old) &&
+                Objects.equals(items, items1.items) &&
                 Objects.equals(currency, items1.currency);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), items, currency);
+        return Objects.hash(super.hashCode(), items, currency, old);
     }
 
     @Override
@@ -104,6 +106,7 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
         return "Cart{" +
                 "items=" + items +
                 ", currency=" + currency +
+                ", old=" + old +
                 "} " + super.toString();
     }
 
@@ -114,6 +117,14 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
         }
 
         return false;
+    }
+
+    public void setOld(boolean old) {
+        this.old = old;
+    }
+
+    public boolean isOld() {
+        return old;
     }
 
     @Embeddable

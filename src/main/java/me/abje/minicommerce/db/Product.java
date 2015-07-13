@@ -14,14 +14,16 @@ public class Product extends ModelBase {
     private String name;
     @JsonIgnore
     private Money price;
-    @Column(columnDefinition="text")
+    @Column(columnDefinition = "text")
     @JsonIgnore
     private String description;
+    private String imageUrl;
 
-    public Product(String name, Money price, String description) {
+    public Product(String name, Money price, String description, String imageUrl) {
         this.name = name;
         this.price = price;
         this.description = description;
+        this.imageUrl = imageUrl;
     }
 
     protected Product() {
@@ -56,6 +58,14 @@ public class Product extends ModelBase {
         this.description = description;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -64,12 +74,13 @@ public class Product extends ModelBase {
         Product product = (Product) o;
         return Objects.equals(name, product.name) &&
                 Objects.equals(price, product.price) &&
-                Objects.equals(description, product.description);
+                Objects.equals(description, product.description) &&
+                Objects.equals(imageUrl, product.imageUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, price, description);
+        return Objects.hash(super.hashCode(), name, price, description, imageUrl);
     }
 
     @Override
@@ -78,6 +89,7 @@ public class Product extends ModelBase {
                 "name='" + name + '\'' +
                 ", price=" + price +
                 ", description='" + description + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
                 "} " + super.toString();
     }
 }

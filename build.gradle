@@ -48,6 +48,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-websocket")
     compile("org.springframework.boot:spring-boot-starter-thymeleaf")
+    compile("org.springframework.boot:spring-boot-starter-aop")
     compile("org.thymeleaf.extras:thymeleaf-extras-springsecurity3:2.1.2.RELEASE")
     compile("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:1.2.1")
     compile("net.sourceforge.nekohtml:nekohtml:1.9.15")

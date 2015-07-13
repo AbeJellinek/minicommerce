@@ -2,10 +2,7 @@ package me.abje.minicommerce;
 
 import com.github.jknack.handlebars.springmvc.HandlebarsViewResolver;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 import com.stripe.Stripe;
-import com.stripe.exception.*;
-import com.stripe.model.Charge;
 import me.abje.minicommerce.config.MinicommerceConfig;
 import me.abje.minicommerce.db.Cart;
 import me.abje.minicommerce.db.CartRepository;
@@ -18,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.embedded.ErrorPage;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +33,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,11 +52,13 @@ public class RootController {
     @Autowired
     private ProductRepository products;
 
-    private List<CurrencyUnit> currencies;
-
     @Autowired
     private HandlebarsViewResolver handlebarsViewResolver;
 
+    @Autowired
+    private AutowireCapableBeanFactory beanFactory;
+
+    private List<CurrencyUnit> currencies;
 
     @PostConstruct
     private void postConstruct() {
@@ -76,6 +77,9 @@ public class RootController {
 
         handlebarsViewResolver.<CurrencyUnit>registerHelper("currencyName", (context, options) ->
                 context.toCurrency().getDisplayName(LocaleContextHolder.getLocale()));
+
+        //noinspection ResultOfMethodCallIgnored
+        new File("uploaded/").mkdir();
     }
 
     @ModelAttribute("siteName")
@@ -113,7 +117,11 @@ public class RootController {
 
     @ModelAttribute("userCurrency")
     public CurrencyUnit getCurrency(HttpSession session) {
-        return (CurrencyUnit) session.getAttribute("currency");
+        CurrencyUnit currency = (CurrencyUnit) session.getAttribute("currency");
+        if (currency != null)
+            return currency;
+        session.setAttribute("currency", currency = getDefaultCurrency());
+        return currency;
     }
 
     @RequestMapping("/")
@@ -186,33 +194,19 @@ public class RootController {
 
     @RequestMapping(value = "/checkout/payment", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse checkoutPayment(@Valid Checkout checkout, Cart cart) {
+    public SuccessResponse checkoutPayment(@Valid Checkout checkout, Cart cart, HttpSession session) {
         if (cart.getTotalQuantity() == 0)
             return new SuccessResponse(false, "Your cart is empty.");
 
-        try {
-            ImmutableMap.Builder<String, Object> address = ImmutableMap.<String, Object>builder().
-                    put("line1", checkout.getAddress1()).
-                    put("city", checkout.getCity()).
-                    put("postal_code", checkout.getPostalCode()).
-                    put("country", checkout.getCountry());
-            if (!checkout.getAddress2().isEmpty())
-                address.put("line2", checkout.getAddress2());
-            if (!checkout.getState().isEmpty())
-                address.put("state", checkout.getState());
-            Charge.create(ImmutableMap.of(
-                    "amount", cart.getTotal().getAmountMinorInt(),
-                    "currency", config.getCurrencyCode(),
-                    "source", checkout.getStripeToken(),
-                    "shipping", ImmutableMap.of(
-                            "address", address.build(),
-                            "name", checkout.getFirstName() + " " + checkout.getLastName())));
-        } catch (AuthenticationException | APIException | CardException |
-                APIConnectionException | InvalidRequestException e) {
-            e.printStackTrace();
-            return new SuccessResponse(false, e.getMessage());
+        beanFactory.autowireBean(checkout.getPayment());
+        SuccessResponse response = checkout.getPayment().buy(checkout, cart);
+
+        if (response.isSuccess()) {
+            cart.setOld(true);
+            session.setAttribute("cart", null);
         }
-        return new SuccessResponse(true, "");
+
+        return response;
     }
 
     @RequestMapping("/product/{id}")
