@@ -67,7 +67,7 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
     public Money getTotal() {
         if (items.isEmpty())
             return Money.zero(currency);
-        return Money.total(items.stream().map(x -> x.getProduct().getPrice().multipliedBy(x.getQuantity())).collect(Collectors.toList()));
+        return Money.total(items.stream().map(x -> x.getPrice().multipliedBy(x.getQuantity())).collect(Collectors.toList()));
     }
 
     public String getPrettyTotal() {
@@ -127,11 +127,22 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
         return old;
     }
 
+    public boolean isShippable() {
+        for (Item item : items) {
+            if (item.getProduct().isShippable()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Embeddable
     public static class Item {
         @OneToOne
         private Product product;
         private int quantity;
+        private Money price;
 
         public Item() {
         }
@@ -139,6 +150,7 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
         public Item(Product product, int quantity) {
             this.product = product;
             this.quantity = quantity;
+            this.price = product.getPrice();
         }
 
         public Product getProduct() {
@@ -155,6 +167,14 @@ public class Cart extends ModelBase implements Iterable<Cart.Item> {
 
         public void setQuantity(int quantity) {
             this.quantity = quantity;
+        }
+
+        public Money getPrice() {
+            return price;
+        }
+
+        public void setPrice(Money price) {
+            this.price = price;
         }
     }
 }

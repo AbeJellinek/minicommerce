@@ -1,13 +1,13 @@
 package me.abje.minicommerce;
 
-public class SuccessResponse {
+public class JSONResponse {
     private boolean success;
     private String message;
 
-    public SuccessResponse() {
+    public JSONResponse() {
     }
 
-    public SuccessResponse(boolean success, String message) {
+    public JSONResponse(boolean success, String message) {
         this.success = success;
         this.message = message;
     }

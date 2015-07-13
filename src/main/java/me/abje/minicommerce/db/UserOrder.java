@@ -1,5 +1,7 @@
 package me.abje.minicommerce.db;
 
+import org.joda.money.Money;
+
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -15,20 +17,25 @@ public class UserOrder extends ModelBase {
     @Embedded
     private Address address;
     private boolean fulfilled;
+    private boolean shippable;
     private String paymentType;
     private String paymentId;
+    private Money paymentAmount;
 
     protected UserOrder() {
     }
 
-    public UserOrder(String name, String email, Cart cart, Address address, boolean fulfilled, String paymentType, String paymentId) {
+    public UserOrder(String name, String email, Cart cart, Address address, boolean fulfilled, boolean shippable,
+                     String paymentType, String paymentId, Money paymentAmount) {
         this.name = name;
         this.email = email;
         this.cart = cart;
         this.address = address;
         this.fulfilled = fulfilled;
+        this.shippable = shippable;
         this.paymentType = paymentType;
         this.paymentId = paymentId;
+        this.paymentAmount = paymentAmount;
     }
 
     public String getName() {
@@ -71,6 +78,14 @@ public class UserOrder extends ModelBase {
         this.fulfilled = fulfilled;
     }
 
+    public boolean isShippable() {
+        return shippable;
+    }
+
+    public void setShippable(boolean shippable) {
+        this.shippable = shippable;
+    }
+
     public String getPaymentType() {
         return paymentType;
     }
@@ -87,36 +102,48 @@ public class UserOrder extends ModelBase {
         this.paymentId = paymentId;
     }
 
+    public Money getPaymentAmount() {
+        return paymentAmount;
+    }
+
+    public void setPaymentAmount(Money paymentAmount) {
+        this.paymentAmount = paymentAmount;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        UserOrder order = (UserOrder) o;
-        return Objects.equals(fulfilled, order.fulfilled) &&
-                Objects.equals(name, order.name) &&
-                Objects.equals(email, order.email) &&
-                Objects.equals(cart, order.cart) &&
-                Objects.equals(address, order.address) &&
-                Objects.equals(paymentType, order.paymentType) &&
-                Objects.equals(paymentId, order.paymentId);
+        UserOrder userOrder = (UserOrder) o;
+        return Objects.equals(fulfilled, userOrder.fulfilled) &&
+                Objects.equals(shippable, userOrder.shippable) &&
+                Objects.equals(name, userOrder.name) &&
+                Objects.equals(email, userOrder.email) &&
+                Objects.equals(cart, userOrder.cart) &&
+                Objects.equals(address, userOrder.address) &&
+                Objects.equals(paymentType, userOrder.paymentType) &&
+                Objects.equals(paymentId, userOrder.paymentId) &&
+                Objects.equals(paymentAmount, userOrder.paymentAmount);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, email, cart, address, fulfilled, paymentType, paymentId);
+        return Objects.hash(super.hashCode(), name, email, cart, address, fulfilled, shippable, paymentType, paymentId, paymentAmount);
     }
 
     @Override
     public String toString() {
-        return "Order{" +
+        return "UserOrder{" +
                 "name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", cart=" + cart +
                 ", address=" + address +
                 ", fulfilled=" + fulfilled +
+                ", shippable=" + shippable +
                 ", paymentType='" + paymentType + '\'' +
                 ", paymentId='" + paymentId + '\'' +
+                ", paymentAmount=" + paymentAmount +
                 "} " + super.toString();
     }
 

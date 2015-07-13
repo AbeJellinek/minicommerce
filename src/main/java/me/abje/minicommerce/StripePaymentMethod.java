@@ -25,7 +25,7 @@ public class StripePaymentMethod implements PaymentMethod {
     }
 
     @Override
-    public SuccessResponse buy(Checkout checkout, Cart cart) {
+    public JSONResponse buy(Checkout checkout, Cart cart) {
         try {
             String fullName = checkout.getFirstName() + " " + checkout.getLastName();
             ImmutableMap.Builder<String, Object> address = ImmutableMap.<String, Object>builder().
@@ -44,15 +44,15 @@ public class StripePaymentMethod implements PaymentMethod {
                     "shipping", ImmutableMap.of(
                             "address", address.build(),
                             "name", fullName)));
-            UserOrder order = orders.save(new UserOrder(fullName, checkout.getEmail(), cart,
+            orders.save(new UserOrder(fullName, checkout.getEmail(), cart,
                     new UserOrder.Address(checkout.getAddress1(), checkout.getAddress2(), checkout.getCity(),
                             checkout.getState(), checkout.getCountry(), checkout.getPostalCode()),
-                    false, "stripe", charge.getId()));
-            return new SuccessResponse(true, "");
+                    false, cart.isShippable(), "stripe", charge.getId(), cart.getTotal()));
+            return new JSONResponse(true, "");
         } catch (AuthenticationException | APIException | CardException |
                 APIConnectionException | InvalidRequestException e) {
             e.printStackTrace();
-            return new SuccessResponse(false, e.getMessage());
+            return new JSONResponse(false, e.getMessage());
         }
     }
 

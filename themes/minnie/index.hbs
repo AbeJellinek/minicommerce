@@ -13,24 +13,26 @@
         </div>
     </div>
 
-    <div class="ui page grid">
-        {{#each products}}
-            <div class="four wide column">
-                <a href="/product/{{id}}">
-                    <div class="ui card">
-                        {{#if image}}
-                            <div class="image">
-                                <img src="{{image}}">
+    <div class="ui container">
+        <div class="ui grid">
+            {{#each products}}
+                <div class="four wide column">
+                    <a href="/product/{{id}}">
+                        <div class="ui card">
+                            {{#if image}}
+                                <div class="image">
+                                    <img src="{{image}}">
+                                </div>
+                            {{/if}}
+                            <div class="content">
+                                <div class="header">{{name}}</div>
+                                <div class="meta"><span class="price">{{prettyPrice}}</span></div>
                             </div>
-                        {{/if}}
-                        <div class="content">
-                            <div class="header">{{name}}</div>
-                            <div class="meta"><span class="price">{{prettyPrice}}</span></div>
                         </div>
-                    </div>
-                </a>
-            </div>
-        {{/each}}
+                    </a>
+                </div>
+            {{/each}}
+        </div>
     </div>
 {{/partial}}
 

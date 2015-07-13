@@ -2,7 +2,7 @@ package me.abje.minicommerce;
 
 import java.util.List;
 
-public class SearchResponse extends SuccessResponse {
+public class SearchResponse extends JSONResponse {
     private final List<Result> results;
 
     public SearchResponse(boolean success, List<Result> results) {

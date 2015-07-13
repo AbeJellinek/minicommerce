@@ -2,7 +2,7 @@ package me.abje.minicommerce;
 
 import me.abje.minicommerce.db.Cart;
 
-public class CartResponse extends SuccessResponse {
+public class CartResponse extends JSONResponse {
     private final Cart cart;
 
     public CartResponse(boolean success, Cart cart) {

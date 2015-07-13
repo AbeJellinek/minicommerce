@@ -1,15 +1,13 @@
 {{#partial "content"}}
-<div class="ui page grid">
+<div class="ui container">
     <div class="sixteen wide column">
         <h1 class="ui centered header">
             {{i "inYourCart"}}
         </h1>
-        <div class="ui top attached segment">
-            {{> cartFragment}}
-        </div>
-        <div class="ui bottom attached segment">
-            <a href="/" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
-            <a id="bigCheckoutButton" href="/checkout" class="ui primary right floated {{#unless cart.totalQuantity}}disabled{{/unless}} right labeled icon button">{{i "checkout"}} <i class="right arrow icon"></i></a>
+        {{> cartFragment}}
+        <div class="ui two bottom attached buttons">
+            <a href="/" class="ui left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
+            <a id="bigCheckoutButton" href="/checkout" class="ui {{#unless cart.totalQuantity}}disabled{{/unless}} right labeled icon button">{{i "checkout"}} <i class="right arrow icon"></i></a>
         </div>
     </div>
 </div>

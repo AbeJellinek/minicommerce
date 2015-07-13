@@ -18,12 +18,14 @@ public class Product extends ModelBase {
     @JsonIgnore
     private String description;
     private String imageUrl;
+    private boolean shippable;
 
-    public Product(String name, Money price, String description, String imageUrl) {
+    public Product(String name, Money price, String description, String imageUrl, boolean shippable) {
         this.name = name;
         this.price = price;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.shippable = shippable;
     }
 
     protected Product() {
@@ -66,13 +68,22 @@ public class Product extends ModelBase {
         this.imageUrl = imageUrl;
     }
 
+    public boolean isShippable() {
+        return shippable;
+    }
+
+    public void setShippable(boolean shippable) {
+        this.shippable = shippable;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Product product = (Product) o;
-        return Objects.equals(name, product.name) &&
+        return Objects.equals(shippable, product.shippable) &&
+                Objects.equals(name, product.name) &&
                 Objects.equals(price, product.price) &&
                 Objects.equals(description, product.description) &&
                 Objects.equals(imageUrl, product.imageUrl);
@@ -80,7 +91,7 @@ public class Product extends ModelBase {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), name, price, description, imageUrl);
+        return Objects.hash(super.hashCode(), name, price, description, imageUrl, shippable);
     }
 
     @Override
@@ -90,6 +101,7 @@ public class Product extends ModelBase {
                 ", price=" + price +
                 ", description='" + description + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", shippable=" + shippable +
                 "} " + super.toString();
     }
 }

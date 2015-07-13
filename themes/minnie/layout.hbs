@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>{{title}} | {{siteName}}</title>
     {{#block "head"}}{{/block}}
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.3/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.0.1/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="/css/layout.css">
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <meta name="_csrf" content="{{_csrf.token}}"/>
@@ -34,9 +34,9 @@
             <i class="cart icon"></i> {{i "cart"}} <div id="navCartTotal" class="ui label">{{cart.totalQuantity}}</div>
         </a>
         {{#unless inCart}}
-        <div class="ui flowing popup">
+        <div id="cartPopup" class="ui special flowing popup">
             {{> cartFragment}}
-            <div style="float: right">
+            <div class="ui bottom attached two buttons">
                 <a href="/cart" class="ui tiny icon button"><i class="expand icon"></i></a>
                 <a id="miniCheckoutButton" href="/checkout" class="ui tiny {{#unless cart.totalQuantity}}disabled{{/unless}} icon button"><i class="right arrow icon"></i></a>
             </div>
@@ -49,7 +49,7 @@
 <h1>Add content here.</h1>
 {{/block}}
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/1.12.3/semantic.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.0.1/semantic.min.js"></script>
 <script type="text/javascript">
     $('.ui.dropdown').dropdown();
 
@@ -72,16 +72,16 @@
         }, 10); // I hate JavaScript.
     });
 
-    $('#cartButton:not(.active)')
-        .popup({
-            inline: true,
-            hoverable: true,
-            transition: 'fade down',
-            delay: {
-                show: 100,
-                hide: 500
-            }
-        });
+    $('#cartButton:not(.active)').popup({
+        hoverable: true,
+        inline: true,
+        transition: 'fade down',
+        position: 'bottom right',
+        delay: {
+            show: 100,
+            hide: 500
+        }
+    });
 
     function annotatePrice(i, elem) {
         var $elem = $(elem);

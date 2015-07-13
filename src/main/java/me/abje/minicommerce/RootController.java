@@ -3,9 +3,7 @@ package me.abje.minicommerce;
 import com.github.jknack.handlebars.springmvc.HandlebarsViewResolver;
 import com.google.common.base.Joiner;
 import com.stripe.Stripe;
-import me.abje.minicommerce.config.MinicommerceConfig;
 import me.abje.minicommerce.db.Cart;
-import me.abje.minicommerce.db.CartRepository;
 import me.abje.minicommerce.db.Product;
 import me.abje.minicommerce.db.ProductRepository;
 import me.abje.minicommerce.money.CurrencyConverter;
@@ -23,31 +21,29 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @Controller
-public class RootController {
+public class RootController extends MiniController {
     @Autowired
     private CurrencyConverter converter;
-
-    @Autowired
-    private CartRepository carts;
-
-    @Autowired
-    private MinicommerceConfig config;
 
     @Autowired
     private ProductRepository products;
@@ -58,16 +54,9 @@ public class RootController {
     @Autowired
     private AutowireCapableBeanFactory beanFactory;
 
-    private List<CurrencyUnit> currencies;
-
     @PostConstruct
     private void postConstruct() {
         Stripe.apiKey = config.getStripeSecret();
-
-        currencies = new ArrayList<>(Arrays.asList(CurrencyUnit.of("USD"), CurrencyUnit.of("JPY"), CurrencyUnit.of("GBP"),
-                CurrencyUnit.of("CHF"), CurrencyUnit.of("AUD"), CurrencyUnit.of("CAD"), CurrencyUnit.of("MXN")));
-        currencies.sort(Comparator.naturalOrder());
-        currencies.remove(config.getCurrency());
 
         handlebarsViewResolver.<String>registerHelper("i", (context, options) -> {
             Locale locale = LocaleContextHolder.getLocale();
@@ -80,48 +69,6 @@ public class RootController {
 
         //noinspection ResultOfMethodCallIgnored
         new File("uploaded/").mkdir();
-    }
-
-    @ModelAttribute("siteName")
-    public String getSiteName() {
-        return config.getSiteName();
-    }
-
-    @ModelAttribute("currencies")
-    public List<CurrencyUnit> getCurrencies() {
-        return currencies;
-    }
-
-    @ModelAttribute("_csrf")
-    public CsrfToken getCsrf(HttpServletRequest request) {
-        return (CsrfToken) request.getAttribute("_csrf");
-    }
-
-    @ModelAttribute("cart")
-    public Cart getCart(HttpSession session) {
-        Integer cartId = (Integer) session.getAttribute("cart");
-        Cart cart;
-        if (cartId == null) {
-            cart = carts.save(new Cart(config.getCurrency()));
-            session.setAttribute("cart", cart.getId());
-        } else {
-            cart = carts.findOne(cartId);
-        }
-        return cart;
-    }
-
-    @ModelAttribute("defaultCurrency")
-    public CurrencyUnit getDefaultCurrency() {
-        return config.getCurrency();
-    }
-
-    @ModelAttribute("userCurrency")
-    public CurrencyUnit getCurrency(HttpSession session) {
-        CurrencyUnit currency = (CurrencyUnit) session.getAttribute("currency");
-        if (currency != null)
-            return currency;
-        session.setAttribute("currency", currency = getDefaultCurrency());
-        return currency;
     }
 
     @RequestMapping("/")
@@ -139,7 +86,7 @@ public class RootController {
 
     @RequestMapping(value = "/cart/quantity/{id}/{quantity}", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse updateQuantity(@PathVariable("id") int id, @PathVariable("quantity") int quantity,
+    public JSONResponse updateQuantity(@PathVariable("id") int id, @PathVariable("quantity") int quantity,
                                           Cart cart) {
         for (ListIterator<Cart.Item> iterator = cart.getItems().listIterator(); iterator.hasNext(); ) {
             Cart.Item item = iterator.next();
@@ -160,7 +107,7 @@ public class RootController {
 
     @RequestMapping(value = "/cart/add/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse addToCart(@PathVariable("id") Product product, Cart cart) {
+    public JSONResponse addToCart(@PathVariable("id") Product product, Cart cart) {
         cart.add(product, 1);
         carts.save(cart);
         return new CartResponse(true, cart);
@@ -168,7 +115,7 @@ public class RootController {
 
     @RequestMapping(value = "/cart/remove/{id}", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse removeFromCart(@PathVariable("id") int id, Cart cart) {
+    public JSONResponse removeFromCart(@PathVariable("id") int id, Cart cart) {
         for (ListIterator<Cart.Item> iterator = cart.getItems().listIterator(); iterator.hasNext(); ) {
             Cart.Item item = iterator.next();
             if (item.getProduct().getId() == id) {
@@ -194,12 +141,12 @@ public class RootController {
 
     @RequestMapping(value = "/checkout/payment", method = RequestMethod.POST)
     @ResponseBody
-    public SuccessResponse checkoutPayment(@Valid Checkout checkout, Cart cart, HttpSession session) {
+    public JSONResponse checkoutPayment(@Valid Checkout checkout, Cart cart, HttpSession session) {
         if (cart.getTotalQuantity() == 0)
-            return new SuccessResponse(false, "Your cart is empty.");
+            return new JSONResponse(false, "Your cart is empty.");
 
         beanFactory.autowireBean(checkout.getPayment());
-        SuccessResponse response = checkout.getPayment().buy(checkout, cart);
+        JSONResponse response = checkout.getPayment().buy(checkout, cart);
 
         if (response.isSuccess()) {
             cart.setOld(true);
@@ -224,10 +171,10 @@ public class RootController {
 
     @RequestMapping("/currency/set/{currencyCode}")
     @ResponseBody
-    public SuccessResponse setCurrency(@PathVariable("currencyCode") String currencyCode, HttpSession session) {
+    public JSONResponse setCurrency(@PathVariable("currencyCode") String currencyCode, HttpSession session) {
         CurrencyUnit currency = CurrencyUnit.of(currencyCode);
         session.setAttribute("currency", currency);
-        return new SuccessResponse(true, "");
+        return new JSONResponse(true, "");
     }
 
     @RequestMapping("/currency/convert/{amount}")

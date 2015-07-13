@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<div class="ui page grid" layout:fragment="content">
+<div class="ui container grid" layout:fragment="content">
     <div class="row">
         <div class="sixteen wide column">
             <h1>Dashboard</h1>
@@ -15,13 +15,49 @@
                 <div class="content">
                     <h4 class="header">Messages</h4>
                 </div>
-                <ul id="messageList" class="ui list">
+                <ul id="messageList" class="ui admin list">
                     <li class="item" th:if="!${#lists.isEmpty(messages)}" th:each="message : ${messages}">
                         <span th:text="${message.value}"></span>
                     </li>
 
                     <li th:if="${#lists.isEmpty(messages)}" class="list-group-item"><i>None to show.</i></li>
                 </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="eight wide column">
+            <div class="ui segment">
+                <div class="content">
+                    <h4 class="header">Recent Orders</h4>
+                </div>
+                <ul class="ui admin list">
+                    <li class="item" th:if="!${#lists.isEmpty(recentOrders)}" th:each="order : ${recentOrders}">
+                        <b th:text="${order.name}"></b>: <span th:text="${order.cart.prettyTotal}"></span>
+                    </li>
+
+                    <li th:if="${#lists.isEmpty(recentOrders)}" class="list-group-item"><i>None to show.</i></li>
+                </ul>
+            </div>
+        </div>
+        <div class="eight wide column">
+            <div class="ui segment">
+                <h4 class="ui header">Statistics</h4>
+                <div class="ui two statistics">
+                    <div class="statistic">
+                        <div th:text="${numOrders}" class="value"></div>
+                        <div class="label">
+                            Orders
+                        </div>
+                    </div>
+                    <div class="statistic">
+                        <div th:text="${totalRevenue}" class="value"></div>
+                        <div class="label">
+                            Revenue
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -2,13 +2,13 @@
     <form method="post">
         <input type="hidden" name="{{_csrf.parameterName}}" value="{{_csrf.token}}"/>
 
-        <div class="ui page grid">
+        <div class="ui container">
             <div class="centered twelve wide column">
                 <h1 class="ui centered header">
                     {{i "checkout"}}
                 </h1>
 
-                <div class="ui three ordered steps">
+                <div class="ui top attached three ordered steps">
                   <div id="step1" class="active step">
                     <div class="content">
                       <div class="title">{{i "shipping"}}</div>
@@ -30,7 +30,7 @@
             </div>
 
             <div id="shipping" class="sixteen wide column">
-                <div class="ui top attached segment">
+                <div class="ui attached segment">
                     <div id="shippingForm" class="ui form">
                         <h3 class="ui dividing header">{{i "shippingAddress"}}</h3>
                         <div class="required field">
@@ -88,27 +88,27 @@
                     </div>
                 </div>
 
-                <div class="ui bottom attached segment">
-                    <a href="/cart" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
-                    <a href="#" id="next" class="ui primary right floated right labeled icon button">{{i "next"}} <i class="right arrow icon"></i></a>
+                <div class="ui two bottom attached buttons">
+                    <a href="/cart" class="ui left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
+                    <a id="next" href="#" class="ui right labeled icon button">{{i "next"}} <i class="right arrow icon"></i></a>
                 </div>
             </div>
 
             <div id="billing" class="sixteen wide column" style="display:none;">
-                <div class="ui top attached segment">
+                <div class="ui attached segment">
                     <div class="ui form">
                         <h3 class="ui dividing header">{{i "billing"}}</h3>
 
-                        {{> cartFragment}}
+                        {{> cartFragment standalone=true}}
 
                         <p>{{{i "stripeMessage"}}}</p>
                         <input type="hidden" name="stripeToken" id="stripeToken">
                     </div>
                 </div>
 
-                <div class="ui bottom attached segment">
-                    <a id="back" href="#" class="ui left floated left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
-                    <a id="pay" href="#" class="ui primary right floated button">{{i "payWithCard"}}</a>
+                <div class="ui two bottom attached buttons">
+                    <a id="back" href="#" class="ui left labeled icon button"><i class="left arrow icon"></i> {{i "back"}}</a>
+                    <a id="pay" href="#" class="ui green button">{{i "payWithCard"}}</a>
                 </div>
             </div>
 
@@ -120,9 +120,7 @@
                     </div>
                 </div>
 
-                <div class="ui bottom attached segment">
-                    <a href="/" class="ui primary right floated button">{{i "done"}}</a>
-                </div>
+                <a href="/" class="ui bottom attached button">{{i "done"}}</a>
             </div>
         </div>
     </form>

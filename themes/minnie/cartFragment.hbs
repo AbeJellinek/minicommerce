@@ -1,4 +1,4 @@
-<table class="ui table">
+<table class="ui {{#unless standalone}}top attached{{/unless}} table">
   <thead>
     <tr>
         <th>{{i "item"}}</th>
@@ -10,7 +10,7 @@
     {{#each cart}}
     {{> cartItem}}
     {{/each}}
-    <tr class="positive">
+    <tr>
         <td><b>{{i "total"}}</b></td>
         <td class="cartTotal price">{{cart.prettyTotal}}</td>
         <td></td>
