@@ -3,7 +3,9 @@ package me.abje.minicommerce;
 import com.github.jknack.handlebars.springmvc.HandlebarsViewResolver;
 import com.google.common.base.Joiner;
 import com.stripe.Stripe;
+import me.abje.minicommerce.config.MinicommerceConfig;
 import me.abje.minicommerce.db.Cart;
+import me.abje.minicommerce.db.CartRepository;
 import me.abje.minicommerce.db.Product;
 import me.abje.minicommerce.db.ProductRepository;
 import me.abje.minicommerce.money.CurrencyConverter;
@@ -23,10 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
@@ -34,14 +33,14 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.File;
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
-public class RootController extends MiniController {
+public class RootController {
+    @Autowired
+    private MiniControllerAdvice miniControllerAdvice;
+
     @Autowired
     private CurrencyConverter converter;
 
@@ -53,6 +52,19 @@ public class RootController extends MiniController {
 
     @Autowired
     private AutowireCapableBeanFactory beanFactory;
+
+    @Autowired
+    protected MinicommerceConfig config;
+
+    @Autowired
+    protected CartRepository carts;
+
+    protected List<CurrencyUnit> currencies;
+
+    @ModelAttribute("currencies")
+    public List<CurrencyUnit> getCurrencies() {
+        return currencies;
+    }
 
     @PostConstruct
     private void postConstruct() {
@@ -69,6 +81,11 @@ public class RootController extends MiniController {
 
         //noinspection ResultOfMethodCallIgnored
         new File("uploaded/").mkdir();
+
+        currencies = new ArrayList<>(Arrays.asList(CurrencyUnit.of("USD"), CurrencyUnit.of("JPY"), CurrencyUnit.of("GBP"),
+                CurrencyUnit.of("CHF"), CurrencyUnit.of("AUD"), CurrencyUnit.of("CAD"), CurrencyUnit.of("MXN")));
+        currencies.sort(Comparator.naturalOrder());
+        currencies.remove(config.getCurrency());
     }
 
     @RequestMapping("/")
@@ -87,7 +104,7 @@ public class RootController extends MiniController {
     @RequestMapping(value = "/cart/quantity/{id}/{quantity}", method = RequestMethod.POST)
     @ResponseBody
     public JSONResponse updateQuantity(@PathVariable("id") int id, @PathVariable("quantity") int quantity,
-                                          Cart cart) {
+                                       Cart cart) {
         for (ListIterator<Cart.Item> iterator = cart.getItems().listIterator(); iterator.hasNext(); ) {
             Cart.Item item = iterator.next();
             if (item.getProduct().getId() == id) {

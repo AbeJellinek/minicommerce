@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.thymeleaf.org" layout:decorator="th/layout">
+<head lang="en">
+    <title>Products</title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="ui page grid" layout:fragment="content">
+    <div class="row">
+        <div class="sixteen wide column">
+            <h1>Products</h1>
+
+            <table class="ui selectable table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="product : ${products}">
+                        <td><a th:href="|/admin/products/${product.id}|" th:text="${product.name}"></a></td>
+                        <td class="price" th:text="${product.prettyPrice}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

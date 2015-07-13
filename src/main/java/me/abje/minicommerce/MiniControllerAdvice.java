@@ -3,23 +3,23 @@ package me.abje.minicommerce;
 import me.abje.minicommerce.config.MinicommerceConfig;
 import me.abje.minicommerce.db.Cart;
 import me.abje.minicommerce.db.CartRepository;
+import me.abje.minicommerce.db.User;
 import org.joda.money.CurrencyUnit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
-@Controller
-public class MiniController {
-    protected List<CurrencyUnit> currencies;
+@ControllerAdvice
+public class MiniControllerAdvice {
+    @ModelAttribute("user")
+    public User getCurrentUser(Authentication authentication) {
+        return authentication == null ? null : (User) authentication.getPrincipal();
+    }
 
     @Autowired
     protected MinicommerceConfig config;
@@ -30,11 +30,6 @@ public class MiniController {
     @ModelAttribute("siteName")
     public String getSiteName() {
         return config.getSiteName();
-    }
-
-    @ModelAttribute("currencies")
-    public List<CurrencyUnit> getCurrencies() {
-        return currencies;
     }
 
     @ModelAttribute("_csrf")
@@ -67,13 +62,5 @@ public class MiniController {
             return currency;
         session.setAttribute("currency", currency = getDefaultCurrency());
         return currency;
-    }
-
-    @PostConstruct
-    private void postConstruct() {
-        currencies = new ArrayList<>(Arrays.asList(CurrencyUnit.of("USD"), CurrencyUnit.of("JPY"), CurrencyUnit.of("GBP"),
-                CurrencyUnit.of("CHF"), CurrencyUnit.of("AUD"), CurrencyUnit.of("CAD"), CurrencyUnit.of("MXN")));
-        currencies.sort(Comparator.naturalOrder());
-        currencies.remove(config.getCurrency());
     }
 }

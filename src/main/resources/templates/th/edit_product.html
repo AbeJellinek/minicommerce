@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.thymeleaf.org" layout:decorator="th/layout">
+<head lang="en">
+    <title th:text="${product.name}"></title>
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+
+<div class="ui container" layout:fragment="content">
+    <div class="ui grid">
+        <div class="sixteen wide column">
+            <h1 th:text="${product.name}"></h1>
+
+            <div th:if="${updated}" class="ui success message">
+                <i class="close icon"></i>
+                <div class="header">Updated</div>
+                <p>Product successfully updated.</p>
+            </div>
+
+            <form method="post" class="ui form">
+                <div class="two fields">
+                    <div class="field">
+                        <label>Name</label>
+                        <input type="text" name="name" placeholder="Name" th:value="${product.name}">
+                    </div>
+
+                    <div class="ui field">
+                        <label>Price</label>
+                        <div class="ui labeled input">
+                            <div class="ui label" th:text="${defaultCurrency.currencyCode}"></div>
+                            <input type="number" name="price" placeholder="Price" th:value="${product.price.amount}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Description</label>
+                    <textarea name="description" th:text="${product.description}"></textarea>
+                </div>
+
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}">
+
+                <button class="ui button" type="submit">Update</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

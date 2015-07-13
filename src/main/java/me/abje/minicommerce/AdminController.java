@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
-public class AdminController extends MiniController {
+public class AdminController {
     @Autowired
-    private CurrentUserControllerAdvice currentUserControllerAdvice;
+    private MiniControllerAdvice miniControllerAdvice;
 
     @Autowired
     private MessageRepository messages;
@@ -34,7 +34,7 @@ public class AdminController extends MiniController {
     private ProductRepository products;
 
     private User user() {
-        return currentUserControllerAdvice.getCurrentUser(SecurityContextHolder.getContext().getAuthentication());
+        return miniControllerAdvice.getCurrentUser(SecurityContextHolder.getContext().getAuthentication());
     }
 
     @RequestMapping
@@ -70,13 +70,13 @@ public class AdminController extends MiniController {
 
     @RequestMapping(value = "/products/new", method = RequestMethod.GET)
     public String editNewProduct() {
-        Product product = products.save(new Product("New Product", Money.zero(getDefaultCurrency()), "", "", false));
+        Product product = products.save(new Product("New Product", Money.zero(config.getCurrency()), "", "", false));
         return "redirect:/admin/products/" + product.getId();
     }
 
     @RequestMapping(value = "/products/{product}", method = RequestMethod.POST)
     public String postEditProduct(@PathVariable("product") Product product, UpdatedProduct update, Model model) {
-        update.on(product, getDefaultCurrency());
+        update.on(product, config.getCurrency());
         products.save(product);
 
         model.addAttribute("product", product);
