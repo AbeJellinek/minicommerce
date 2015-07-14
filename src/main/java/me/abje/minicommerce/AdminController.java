@@ -8,11 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
@@ -82,5 +85,14 @@ public class AdminController {
         model.addAttribute("product", product);
         model.addAttribute("updated", true);
         return "th/edit_product";
+    }
+
+    @RequestMapping(value = "/upload", consumes = "multipart/form-data")
+    @ResponseBody
+    public JSONResponse uploadImage(@RequestPart("image") MultipartFile imageFile) throws IOException {
+        BufferedImage image = ImageIO.read(imageFile.getInputStream());
+        File file = new File("uploaded/" + UUID.randomUUID() + ".png");
+        ImageIO.write(image, "PNG", file);
+        return new JSONResponse(true, "/img/uploaded/" + file.getName());
     }
 }

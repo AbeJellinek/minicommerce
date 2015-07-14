@@ -14,23 +14,19 @@
     </div>
 
     <div class="ui container">
-        <div class="ui grid">
+        <div class="ui cards">
             {{#each products}}
-                <div class="four wide column">
-                    <a href="/product/{{id}}">
-                        <div class="ui card">
-                            {{#if image}}
-                                <div class="image">
-                                    <img src="{{image}}">
-                                </div>
-                            {{/if}}
-                            <div class="content">
-                                <div class="header">{{name}}</div>
-                                <div class="meta"><span class="price">{{prettyPrice}}</span></div>
+                <a class="ui card" href="/product/{{id}}">
+                    <div class="content">
+                        {{#if imageUrl}}
+                            <div class="ui right floated small image">
+                                <img src="{{imageUrl}}">
                             </div>
-                        </div>
-                    </a>
-                </div>
+                        {{/if}}
+                        <div class="header">{{name}}</div>
+                        <div class="meta"><span class="price">{{prettyPrice}}</span></div>
+                    </div>
+                </a>
             {{/each}}
         </div>
     </div>

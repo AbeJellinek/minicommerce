@@ -8,6 +8,8 @@ public class UpdatedProduct {
     private String name;
     private double price;
     private String description;
+    private String imageUrl;
+    private boolean shippable;
 
     public String getName() {
         return name;
@@ -33,9 +35,27 @@ public class UpdatedProduct {
         this.description = description;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public boolean isShippable() {
+        return shippable;
+    }
+
+    public void setShippable(boolean shippable) {
+        this.shippable = shippable;
+    }
+
     public void on(Product product, CurrencyUnit currency) {
         product.setName(name);
         product.setPrice(Money.of(currency, price));
         product.setDescription(description);
+        product.setImageUrl(imageUrl);
+        product.setShippable(shippable);
     }
 }

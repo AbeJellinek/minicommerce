@@ -17,34 +17,87 @@
                 <p>Product successfully updated.</p>
             </div>
 
-            <form method="post" class="ui form">
+            <form method="post" class="ui form" th:object="${product}">
                 <div class="two fields">
                     <div class="field">
                         <label>Name</label>
-                        <input type="text" name="name" placeholder="Name" th:value="${product.name}">
+                        <input type="text" th:field="*{name}">
                     </div>
 
                     <div class="ui field">
                         <label>Price</label>
                         <div class="ui labeled input">
                             <div class="ui label" th:text="${defaultCurrency.currencyCode}"></div>
-                            <input type="number" name="price" placeholder="Price" th:value="${product.price.amount}">
+                            <input type="number" th:value="${product.price.amount}" name="price" id="price" min="0" step="0.01">
                         </div>
                     </div>
                 </div>
 
                 <div class="field">
                     <label>Description</label>
-                    <textarea name="description" th:text="${product.description}"></textarea>
+                    <textarea name="description" th:field="*{description}"></textarea>
+                </div>
+
+                <div class="field">
+                    <div class="two fields">
+                        <div class="field">
+                            <label>Image URL</label>
+                            <div class="ui action input">
+                                <input type="text" th:field="*{imageUrl}">
+                                <button type="button" class="ui button" id="imageUploadButton">Upload</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="ui checkbox">
+                        <input type="checkbox" th:field="*{shippable}" tabindex="0" class="hidden">
+                        <label>Shippable</label>
+                    </div>
                 </div>
 
                 <input type="hidden" name="_csrf" th:value="${_csrf.token}">
 
                 <button class="ui button" type="submit">Update</button>
             </form>
+
+            <form id="uploadForm" action="/admin/upload" enctype="multipart/form-data" method="post">
+                <input type="file" id="imageFile" name="image" style="display: none">
+            </form>
         </div>
     </div>
 </div>
+
+<script layout:fragment="bottom">
+$('.ui.checkbox').checkbox();
+
+$('#imageUploadButton').click(function () {
+    $('#imageFile').click();
+});
+
+$('#imageFile').change(function () {
+    var formData = new FormData($('#uploadForm')[0]);
+    $.ajax({
+        type: 'POST',
+        url: '/admin/upload',
+        data: formData,
+        contentType: false,
+        processData: false,
+        cache: false,
+        headers: {
+            'X-CSRF-TOKEN': $('input[name=_csrf]').val()
+        },
+        success: function (data) {
+            console.log(data);
+            $('#imageUrl').val(data.message);
+        },
+        error: function (data) {
+            console.log(data)
+        }
+    });
+});
+</script>
 
 </body>
 </html>
